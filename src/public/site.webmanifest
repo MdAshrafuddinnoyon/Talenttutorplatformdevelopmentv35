@@ -1,0 +1,65 @@
+{
+  "name": "Talent Tutor - টিউশন মার্কেটপ্লেস",
+  "short_name": "Talent Tutor",
+  "description": "বাংলাদেশের প্রথম Upwork-style টিউশন মার্কেটপ্লেস প্ল্যাটফর্ম",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "lifestyle", "business"],
+  "lang": "bn",
+  "dir": "ltr",
+  "scope": "/",
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide"
+    },
+    {
+      "src": "/screenshots/mobile-1.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "platform": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "শিক্ষক খুঁজুন",
+      "short_name": "Find Teachers",
+      "description": "যোগ্য শিক্ষক খুঁজুন",
+      "url": "/find-teachers",
+      "icons": [{ "src": "/icons/teacher-icon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "টিউশন পোস্ট",
+      "short_name": "Post Job",
+      "description": "টিউশন পোস্ট করুন",
+      "url": "/browse-tuitions",
+      "icons": [{ "src": "/icons/job-icon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "দান করুন",
+      "short_name": "Donate",
+      "description": "শিক্ষায় অবদান রাখুন",
+      "url": "/donate",
+      "icons": [{ "src": "/icons/donate-icon.png", "sizes": "96x96" }]
+    }
+  ]
+}

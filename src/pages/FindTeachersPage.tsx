@@ -1,0 +1,929 @@
+import { useState, useEffect } from 'react';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { Badge } from '../components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Slider } from '../components/ui/slider';
+import { Checkbox } from '../components/ui/checkbox';
+import { Separator } from '../components/ui/separator';
+import { CardAvatar } from '../components/ui/profile-avatar';
+import { 
+  ArrowLeft, 
+  Search, 
+  MapPin, 
+  Star, 
+  Verified, 
+  Heart, 
+  DollarSign,
+  Clock,
+  TrendingUp,
+  Award,
+  MessageSquare,
+  Video,
+  CheckCircle,
+  Filter,
+  BookOpen,
+  Calendar,
+  Target,
+  Zap,
+  GraduationCap
+} from 'lucide-react';
+import { Header } from '../components/Header';
+import { Footer } from '../components/Footer';
+import { ChatDialog } from '../components/ChatDialog';
+import { VideoMeetingDialog } from '../components/VideoMeetingDialog';
+import { HiringAgreementDialog } from '../components/HiringAgreementDialog';
+import { UnifiedAuthDialog } from '../components/UnifiedAuthDialog';
+import { LoadMoreButton } from '../components/LoadMoreButton';
+import { BangladeshLocationSelector } from '../components/BangladeshLocationSelector';
+import { motion } from 'motion/react';
+import { toast } from 'sonner@2.0.3';
+import { teachersDatabase, type Teacher } from '../utils/teachersData';
+import { mockConversations, mockUserCredits } from '../utils/upworkFeatures';
+import { canContactUser, getActionErrorMessage, type UserRole, type User } from '../utils/authGuard';
+import { subjectCategories, allSubjects as subjectsFromData } from '../utils/subjectsData';
+import { mediums, mediumLabels } from '../utils/mediumData';
+import { getLocationById } from '../utils/bangladeshLocations';
+import { teachersAPI } from '../utils/databaseService';
+
+interface FindTeachersPageProps {
+  language: 'bn' | 'en';
+  setLanguage: (lang: 'bn' | 'en') => void;
+  setPage: (page: string) => void;
+  announcement?: { title: string; message: string; type: string } | null;
+  userRole?: 'guardian' | 'teacher' | 'student' | 'donor' | 'admin' | null;
+  currentUser?: User | null;
+  isAuthenticated?: boolean;
+  onLogin?: (type: UserRole) => void;
+  onLogout?: () => void;
+  onSelectTeacher?: (teacherId: string) => void;
+}
+
+const content = {
+  bn: {
+    title: 'শিক্ষক খুঁজুন',
+    subtitle: 'যোগ্য এবং যাচাইকৃত শিক্ষক খুঁজে পান',
+    backToHome: 'হোমে ফিরুন',
+    search: 'শিক্ষক খুঁজুন...',
+    filters: 'ফিল্টার',
+    clearFilters: 'ফিল্টার রিসেট',
+    medium: 'মিডিয়াম',
+    allMediums: 'সকল মিডিয়াম',
+    subject: 'বিষয়',
+    allSubjects: 'সকল বিষয়',
+    class: 'শ্রেণী',
+    allClasses: 'সকল শ্রেণী',
+    location: 'এলাকা',
+    allLocations: 'সকল এলাকা',
+    hourlyRate: 'ঘণ্টা প্রতি রেট',
+    verified: 'শুধু যাচাইকৃত',
+    topRated: 'শুধু শীর্ষ রেটেড',
+    viewProfile: 'প্রোফাইল দেখুন',
+    sendProposal: 'প্রস্তাব পাঠান',
+    saveTeacher: 'সংরক্ষণ',
+    teachersFound: 'জন শিক্ষক',
+    perHour: '/ঘণ্টা',
+    jobSuccess: 'জব সাকসেস',
+    totalJobs: 'মোট চাকরি',
+    earned: 'আয়',
+    responseTime: 'রেসপন্স টাইম',
+    online: 'অনলাইন',
+    availability: 'প্রাপ্যতা',
+    available: 'Available',
+    busy: 'Busy',
+    offline: 'Offline',
+    sortBy: 'সাজান',
+    recommended: 'প্রস্তাবিত',
+    highestRated: 'সর্বোচ্চ রেটেড',
+    mostReviews: 'সবচেয়ে বেশি রিভিউ',
+    lowestRate: 'সর্বনিম্ন রেট',
+    highestRate: 'সর্বোচ্চ রেট',
+    startChat: 'চ্যাট শুরু করুন',
+    scheduleVideo: 'ভিডিও মিটিং',
+    sendHiring: 'হায়ারিং এগ্রিমেন্ট',
+  },
+  en: {
+    title: 'Find Teachers',
+    subtitle: 'Find Qualified and Verified Teachers',
+    backToHome: 'Back to Home',
+    search: 'Search teachers...',
+    filters: 'Filters',
+    clearFilters: 'Clear Filters',
+    medium: 'Medium',
+    allMediums: 'All Mediums',
+    subject: 'Subject',
+    allSubjects: 'All Subjects',
+    class: 'Class',
+    allClasses: 'All Classes',
+    location: 'Location',
+    allLocations: 'All Locations',
+    hourlyRate: 'Hourly Rate',
+    verified: 'Verified Only',
+    topRated: 'Top Rated Only',
+    viewProfile: 'View Profile',
+    sendProposal: 'Send Proposal',
+    saveTeacher: 'Save',
+    teachersFound: 'teachers',
+    perHour: '/hour',
+    jobSuccess: 'Job Success',
+    totalJobs: 'Total Jobs',
+    earned: 'Earned',
+    responseTime: 'Response Time',
+    online: 'Online',
+    availability: 'Availability',
+    available: 'Available',
+    busy: 'Busy',
+    offline: 'Offline',
+    sortBy: 'Sort By',
+    recommended: 'Recommended',
+    highestRated: 'Highest Rated',
+    mostReviews: 'Most Reviews',
+    lowestRate: 'Lowest Rate',
+    startChat: 'Start Chat',
+    scheduleVideo: 'Video Meeting',
+    sendHiring: 'Hiring Agreement',
+    highestRate: 'Highest Rate',
+  },
+};
+
+export function FindTeachersPage({ 
+  language, 
+  setLanguage, 
+  setPage, 
+  announcement,
+  userRole,
+  currentUser,
+  isAuthenticated,
+  onLogin,
+  onLogout,
+  onSelectTeacher 
+}: FindTeachersPageProps) {
+  const t = content[language];
+  
+  const [teachers, setTeachers] = useState<Teacher[]>(teachersDatabase);
+  const [isLoadingTeachers, setIsLoadingTeachers] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedMedium, setSelectedMedium] = useState<string>('all');
+  const [selectedSubject, setSelectedSubject] = useState<string>('all');
+  const [selectedClass, setSelectedClass] = useState<string>('all');
+  const [selectedLocation, setSelectedLocation] = useState<{
+    division?: string;
+    district?: string;
+    area?: string;
+  }>({});
+  const [hourlyRateRange, setHourlyRateRange] = useState([0, 1500]);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [topRatedOnly, setTopRatedOnly] = useState(false);
+  const [sortBy, setSortBy] = useState('recommended');
+  const [savedTeachers, setSavedTeachers] = useState<string[]>([]);
+  
+  // Pagination states
+  const [displayCount, setDisplayCount] = useState(12); // Show 12 initially
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const ITEMS_PER_PAGE = 12;
+  
+  // Dialog states
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [isVideoMeetingOpen, setIsVideoMeetingOpen] = useState(false);
+  const [isHiringOpen, setIsHiringOpen] = useState(false);
+  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+  
+  // Mock current user (guardian)
+  const currentUserId = 'guardian-001';
+  const currentUserCredits = mockUserCredits[currentUserId]?.currentBalance || 85;
+
+  // Fetch teachers from database
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      setIsLoadingTeachers(true);
+      try {
+        const dbTeachers = await teachersAPI.getAll();
+        if (dbTeachers && dbTeachers.length > 0) {
+          // Convert database teachers to app format
+          const formattedTeachers = dbTeachers.map((t: any) => ({
+            id: t.id,
+            name: t.name,
+            photo: t.photo || '/placeholder-avatar.png',
+            subjects: t.subjects || [],
+            classes: t.classes || [],
+            location: t.location?.district || 'Dhaka',
+            hourlyRate: t.hourlyRate || 500,
+            rating: t.rating || 4.5,
+            totalReviews: t.totalReviews || 0,
+            experience: t.experience || '1 year',
+            education: t.education || '',
+            verified: t.verified || false,
+            topRated: t.rating >= 4.5,
+            medium: t.medium || ['Bangla Medium'],
+            bio: t.bio || '',
+            responseTime: '< 1 hour'
+          }));
+          setTeachers(formattedTeachers);
+        } else {
+          // Fallback to static data
+          setTeachers(teachersDatabase);
+        }
+      } catch (error) {
+        console.info('Using fallback teacher data (database not yet configured):', error);
+        setTeachers(teachersDatabase);
+      } finally {
+        setIsLoadingTeachers(false);
+      }
+    };
+
+    fetchTeachers();
+  }, []);
+
+  // Extract unique values for filters
+  const allSubjects = Array.from(new Set(teachers.flatMap(t => t.subjects)));
+  const allClasses = Array.from(new Set(teachers.flatMap(t => t.classes)));
+  const allLocations = Array.from(new Set(teachers.map(t => t.location)));
+
+  // Filter teachers
+  const filteredTeachers = teachers.filter(teacher => {
+    // Search query
+    if (searchQuery && !teacher.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        !teacher.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        !teacher.subjects.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()))) {
+      return false;
+    }
+    
+    // Subject filter
+    if (selectedSubject && selectedSubject !== 'all' && !teacher.subjects.includes(selectedSubject)) return false;
+    
+    // Class filter
+    if (selectedClass && selectedClass !== 'all' && !teacher.classes.includes(selectedClass)) return false;
+    
+    // Location filter - now checks division, district, area
+    if (selectedLocation.area) {
+      const areaLocation = getLocationById(selectedLocation.area);
+      if (areaLocation && !teacher.location.includes(areaLocation.nameBn) && !teacher.location.includes(areaLocation.name)) {
+        return false;
+      }
+    } else if (selectedLocation.district) {
+      const districtLocation = getLocationById(selectedLocation.district);
+      if (districtLocation && !teacher.location.includes(districtLocation.nameBn) && !teacher.location.includes(districtLocation.name)) {
+        return false;
+      }
+    } else if (selectedLocation.division) {
+      const divisionLocation = getLocationById(selectedLocation.division);
+      if (divisionLocation && !teacher.location.includes(divisionLocation.nameBn) && !teacher.location.includes(divisionLocation.name)) {
+        return false;
+      }
+    }
+    
+    // Hourly rate filter
+    if (teacher.hourlyRate.min > hourlyRateRange[1] || teacher.hourlyRate.max < hourlyRateRange[0]) {
+      return false;
+    }
+    
+    // Verified filter
+    if (verifiedOnly && !teacher.verified) return false;
+    
+    // Top rated filter
+    if (topRatedOnly && !teacher.topRated) return false;
+    
+    return true;
+  });
+
+  // Sort teachers
+  const sortedTeachers = [...filteredTeachers].sort((a, b) => {
+    switch (sortBy) {
+      case 'highestRated':
+        return b.rating - a.rating;
+      case 'mostReviews':
+        return b.totalReviews - a.totalReviews;
+      case 'lowestRate':
+        return a.hourlyRate.min - b.hourlyRate.min;
+      case 'highestRate':
+        return b.hourlyRate.min - a.hourlyRate.min;
+      default: // recommended
+        return (b.topRated ? 1 : 0) - (a.topRated ? 1 : 0) || b.jobSuccess - a.jobSuccess;
+    }
+  });
+
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setSelectedMedium('all');
+    setSelectedSubject('all');
+    setSelectedClass('all');
+    setSelectedLocation({});
+    setHourlyRateRange([0, 1500]);
+    setVerifiedOnly(false);
+    setTopRatedOnly(false);
+    setSortBy('recommended');
+  };
+
+  const handleLoadMore = () => {
+    setIsLoadingMore(true);
+    
+    // Simulate loading delay
+    setTimeout(() => {
+      setDisplayCount(prev => prev + ITEMS_PER_PAGE);
+      setIsLoadingMore(false);
+    }, 800);
+  };
+
+  const handleSaveTeacher = (teacherId: string) => {
+    if (savedTeachers.includes(teacherId)) {
+      setSavedTeachers(savedTeachers.filter(id => id !== teacherId));
+      toast.success('শিক্ষক সংরক্ষণ তালিকা থেকে সরানো হয়েছে');
+    } else {
+      setSavedTeachers([...savedTeachers, teacherId]);
+      toast.success('শিক্ষক সংরক্ষণ করা হয়েছে');
+    }
+  };
+
+  const handleViewProfile = (teacherId: string) => {
+    // Anyone can view teacher profiles (no auth required)
+    if (onSelectTeacher) {
+      onSelectTeacher(teacherId);
+    } else {
+      setPage('teacher-profile-view');
+    }
+  };
+
+  /**
+   * Handle contact/chat with authentication guard
+   */
+  const handleStartChat = (teacher: Teacher) => {
+    // Check if user can contact teacher
+    const permission = canContactUser(userRole, 'teacher', currentUser || null);
+    
+    if (!permission.allowed) {
+      const errorMessage = getActionErrorMessage(permission.reason!, language);
+      toast.error(errorMessage);
+      
+      // If not authenticated, show login dialog
+      if (permission.reason === 'auth_required') {
+        setShowAuthDialog(true);
+      } else if (permission.reason === 'profile_incomplete') {
+        // Navigate to profile completion
+        if (userRole === 'guardian') {
+          setPage('guardian-profile');
+        } else if (userRole === 'teacher') {
+          setPage('teacher-profile');
+        }
+      } else if (permission.reason === 'insufficient_credits') {
+        // Navigate to credit purchase
+        setPage('credit-purchase');
+      }
+      
+      return;
+    }
+    
+    // Permission granted - open chat
+    setSelectedTeacher(teacher);
+    setIsChatOpen(true);
+  };
+
+  /**
+   * Handle video meeting with authentication guard
+   */
+  const handleScheduleVideo = (teacher: Teacher) => {
+    const permission = canContactUser(userRole, 'teacher', currentUser || null);
+    
+    if (!permission.allowed) {
+      const errorMessage = getActionErrorMessage(permission.reason!, language);
+      toast.error(errorMessage);
+      
+      if (permission.reason === 'auth_required') {
+        setShowAuthDialog(true);
+      } else if (permission.reason === 'profile_incomplete') {
+        if (userRole === 'guardian') {
+          setPage('guardian-profile');
+        } else if (userRole === 'teacher') {
+          setPage('teacher-profile');
+        }
+      } else if (permission.reason === 'insufficient_credits') {
+        setPage('credit-purchase');
+      }
+      
+      return;
+    }
+    
+    setSelectedTeacher(teacher);
+    setIsVideoMeetingOpen(true);
+  };
+
+  /**
+   * Handle hiring agreement with authentication guard
+   */
+  const handleSendHiring = (teacher: Teacher) => {
+    const permission = canContactUser(userRole, 'teacher', currentUser || null);
+    
+    if (!permission.allowed) {
+      const errorMessage = getActionErrorMessage(permission.reason!, language);
+      toast.error(errorMessage);
+      
+      if (permission.reason === 'auth_required') {
+        setShowAuthDialog(true);
+      } else if (permission.reason === 'profile_incomplete') {
+        if (userRole === 'guardian') {
+          setPage('guardian-profile');
+        } else if (userRole === 'teacher') {
+          setPage('teacher-profile');
+        }
+      } else if (permission.reason === 'insufficient_credits') {
+        setPage('credit-purchase');
+      }
+      
+      return;
+    }
+    
+    setSelectedTeacher(teacher);
+    setIsHiringOpen(true);
+  };
+
+  const handleSendMessage = (message: string) => {
+    console.log('Message sent:', message);
+    // In real app, this would send to backend
+  };
+
+  const handleVideoScheduled = (meetingData: any) => {
+    console.log('Video meeting scheduled:', meetingData);
+    // In real app, this would create meeting in backend
+    toast.success(language === 'bn' 
+      ? `ভিডিও মিটিং শিডিউল হয়েছে! ২০ ক্রেডিট কাটা হয়েছে।`
+      : `Video meeting scheduled! 20 credits deducted.`
+    );
+  };
+
+  const handleAgreementSent = (agreementData: any) => {
+    console.log('Hiring agreement sent:', agreementData);
+    // In real app, this would send to backend
+    toast.success(language === 'bn'
+      ? 'হায়ারিং এগ্রিমেন্ট সফলভাবে পাঠানো হয়েছে!'
+      : 'Hiring agreement sent successfully!'
+    );
+  };
+
+  const getAvailabilityColor = (availability: string) => {
+    switch (availability) {
+      case 'available':
+        return 'text-green-600 bg-green-50 border-green-200';
+      case 'busy':
+        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+      case 'offline':
+        return 'text-gray-600 bg-gray-50 border-gray-200';
+      default:
+        return 'text-gray-600 bg-gray-50 border-gray-200';
+    }
+  };
+
+  const getAvailabilityText = (availability: string) => {
+    switch (availability) {
+      case 'available':
+        return t.available;
+      case 'busy':
+        return t.busy;
+      case 'offline':
+        return t.offline;
+      default:
+        return t.offline;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-teal-50">
+      <Header
+        language={language}
+        setLanguage={setLanguage}
+        setPage={setPage}
+        announcement={announcement}
+        onLogin={onLogin}
+        currentUser={currentUser}
+        onLogout={onLogout}
+      />
+
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-teal-600 via-emerald-600 to-cyan-600 text-white py-6 sm:py-8 lg:py-10">
+        <div className="container mx-auto px-3 sm:px-4">
+          <div className="max-w-4xl">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setPage('home')}
+              className={`text-white hover:bg-white/20 mb-3 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              {t.backToHome}
+            </Button>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <h1 className={`text-white mb-2 text-2xl sm:text-3xl ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{t.title}</h1>
+              <p className={`text-base sm:text-lg text-teal-100 mb-4 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{t.subtitle}</p>
+
+              {/* Stats */}
+              <div className="flex flex-wrap gap-2 sm:gap-3 mb-4">
+                <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-[Noto_Serif_Bengali]">
+                  <TrendingUp className="w-4 h-4" />
+                  <span>{teachersDatabase.length}+ যোগ্য শিক্ষক</span>
+                </div>
+                <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-[Noto_Serif_Bengali]">
+                  <CheckCircle className="w-4 h-4" />
+                  <span>{teachersDatabase.filter(t => t.verified).length}+ যাচাইকৃত</span>
+                </div>
+                <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-[Noto_Serif_Bengali]">
+                  <Award className="w-4 h-4" />
+                  <span>৯৫% সাফল্যের হার</span>
+                </div>
+              </div>
+
+              {/* Search and Sort */}
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder={t.search}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 h-10 bg-white/95 backdrop-blur-sm border-0 shadow-lg text-gray-900 placeholder:text-gray-500 text-sm"
+                  />
+                </div>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-full sm:w-44 h-10 bg-white/95 backdrop-blur-sm border-0 shadow-lg text-gray-900 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recommended">{t.recommended}</SelectItem>
+                    <SelectItem value="highestRated">{t.highestRated}</SelectItem>
+                    <SelectItem value="mostReviews">{t.mostReviews}</SelectItem>
+                    <SelectItem value="lowestRate">{t.lowestRate}</SelectItem>
+                    <SelectItem value="highestRate">{t.highestRate}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-5">
+          {/* Filters Sidebar */}
+          <div className="lg:col-span-1">
+            <Card className="p-4 sm:p-5 sticky top-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className={`text-gray-900 flex items-center gap-2 text-base ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                  <Filter className="w-4 h-4" />
+                  {t.filters}
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearFilters}
+                  className={`text-teal-600 hover:text-teal-700 text-xs px-2 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+                >
+                  {t.clearFilters}
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                {/* Location Filter - Bangladesh Location Selector */}
+                <div>
+                  <label className={`text-sm font-medium text-gray-700 mb-2 block ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                    {t.location}
+                  </label>
+                  <BangladeshLocationSelector
+                    value={selectedLocation}
+                    onChange={(location) => setSelectedLocation({
+                      division: location.division,
+                      district: location.district,
+                      area: location.area
+                    })}
+                    showSearch={true}
+                    showAreaLevel={true}
+                    language={language}
+                    compact={true}
+                  />
+                </div>
+
+
+
+                {/* Medium Filter */}
+                <div>
+                  <label className={`text-sm font-medium text-gray-700 mb-2 block ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                    {t.medium}
+                  </label>
+                  <Select value={selectedMedium || 'all'} onValueChange={(value) => setSelectedMedium(value || 'all')}>
+                    <SelectTrigger className={`w-full ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      <SelectValue placeholder={t.allMediums} />
+                    </SelectTrigger>
+                    <SelectContent className={language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}>
+                      <SelectItem value="all">{t.allMediums}</SelectItem>
+                      {mediums.map(medium => (
+                        <SelectItem key={medium.id} value={medium.id}>
+                          {medium.icon} {language === 'bn' ? medium.name.bn : medium.name.en}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Subject Filter - Enhanced with Categories */}
+                <div>
+                  <label className={`text-sm font-medium text-gray-700 mb-2 block ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                    {t.subject}
+                  </label>
+                  <Select value={selectedSubject || 'all'} onValueChange={(value) => setSelectedSubject(value || 'all')}>
+                    <SelectTrigger className={`w-full ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      <SelectValue placeholder={t.allSubjects} />
+                    </SelectTrigger>
+                    <SelectContent className={`${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''} max-h-[400px]`}>
+                      <SelectItem value="all">{t.allSubjects}</SelectItem>
+                      
+                      {/* Subject Categories */}
+                      {subjectCategories.map((category) => {
+                        const categorySubjects = subjectsFromData.filter(s => s.category === category.id);
+                        if (categorySubjects.length === 0) return null;
+                        
+                        return (
+                          <div key={category.id}>
+                            <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50">
+                              {language === 'bn' ? category.name_bn : category.name_en}
+                            </div>
+                            {categorySubjects.map(subject => (
+                              <SelectItem key={subject.id} value={subject.id}>
+                                {language === 'bn' ? subject.name_bn : subject.name_en}
+                              </SelectItem>
+                            ))}
+                          </div>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Class Filter */}
+                <div>
+                  <label className={`text-sm font-medium text-gray-700 mb-2 block ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                    {t.class}
+                  </label>
+                  <Select value={selectedClass || 'all'} onValueChange={(value) => setSelectedClass(value || 'all')}>
+                    <SelectTrigger className={`w-full ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      <SelectValue placeholder={t.allClasses} />
+                    </SelectTrigger>
+                    <SelectContent className={language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}>
+                      <SelectItem value="all">{t.allClasses}</SelectItem>
+                      {allClasses.map(cls => (
+                        <SelectItem key={cls} value={cls}>{cls}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Separator />
+
+                {/* Hourly Rate Range */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-3 block">
+                    {t.hourlyRate}
+                  </label>
+                  <div className="space-y-3">
+                    <Slider
+                      min={0}
+                      max={1500}
+                      step={50}
+                      value={hourlyRateRange}
+                      onValueChange={setHourlyRateRange}
+                    />
+                    <div className="flex items-center justify-between text-sm text-gray-600">
+                      <span>৳{hourlyRateRange[0].toLocaleString()}</span>
+                      <span>৳{hourlyRateRange[1].toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Preferences */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-3 block">
+                    পছন্দসমূহ
+                  </label>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="verified"
+                        checked={verifiedOnly}
+                        onCheckedChange={(checked) => setVerifiedOnly(checked as boolean)}
+                      />
+                      <label htmlFor="verified" className="text-sm text-gray-700 cursor-pointer flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-blue-600" />
+                        {t.verified}
+                      </label>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="topRated"
+                        checked={topRatedOnly}
+                        onCheckedChange={(checked) => setTopRatedOnly(checked as boolean)}
+                      />
+                      <label htmlFor="topRated" className="text-sm text-gray-700 cursor-pointer flex items-center gap-2">
+                        <Award className="w-4 h-4 text-yellow-600" />
+                        {t.topRated}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Teachers List */}
+          <div className="lg:col-span-3">
+            {/* Results Count */}
+            <div className="mb-6">
+              <div className={`text-gray-700 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                <span className="font-bold text-2xl text-teal-600">{sortedTeachers.length}</span> {t.teachersFound}
+              </div>
+            </div>
+
+            {/* Teachers Cards - Upwork Style */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
+              {sortedTeachers.slice(0, displayCount).map((teacher, index) => (
+                <motion.div
+                  key={teacher.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Card className="p-3 sm:p-4 hover:shadow-xl transition-all duration-300 border border-gray-200 h-full flex flex-col">
+                    {/* Header Section */}
+                    <div className="flex items-start gap-2 sm:gap-3 mb-3">
+                      <div className="relative flex-shrink-0">
+                        <CardAvatar 
+                          src={teacher.photo}
+                          alt={teacher.name}
+                          fallback={teacher.name.charAt(0)}
+                          className="border-2 border-gray-100"
+                          size="sm"
+                        />
+                        {teacher.verified && (
+                          <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 text-white rounded-full p-0.5">
+                            <Verified className="w-2.5 h-2.5 fill-current" />
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h3 className={`text-gray-900 truncate mb-0.5 text-sm ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{teacher.name}</h3>
+                        <p className={`text-xs text-gray-600 mb-1 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{teacher.location}</p>
+                        
+                        {/* Rate & Rating Row */}
+                        <div className={`flex items-center gap-2 text-xs ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                          <span className="font-semibold text-gray-900">
+                            ৳{teacher.hourlyRate.min}/hr
+                          </span>
+                          <div className="flex items-center gap-0.5">
+                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            <span className="font-semibold text-gray-900">{teacher.rating}</span>
+                          </div>
+                          <div className="flex items-center gap-0.5 text-gray-600">
+                            <CheckCircle className="w-3 h-3" />
+                            <span>{teacher.completedJobs} jobs</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bio/Description */}
+                    <p className={`text-xs text-gray-700 mb-2 sm:mb-3 line-clamp-2 flex-grow ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      {teacher.bio}
+                    </p>
+
+                    {/* Skills Tags */}
+                    <div className="flex flex-wrap gap-1 mb-2 sm:mb-3">
+                      {teacher.skills.slice(0, 3).map((skill) => (
+                        <Badge 
+                          key={skill} 
+                          variant="secondary" 
+                          className={`text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-700 hover:bg-gray-200 border-0 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+                        >
+                          {skill}
+                        </Badge>
+                      ))}
+                      {teacher.skills.length > 3 && (
+                        <button 
+                          className={`text-[10px] text-gray-600 hover:text-gray-900 flex items-center ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+                          onClick={() => handleViewProfile(teacher.id)}
+                        >
+                          <span>+{teacher.skills.length - 3}</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* View Profile Button - Upwork Green */}
+                    <Button
+                      onClick={() => handleViewProfile(teacher.id)}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white text-xs h-8"
+                    >
+                      See profile
+                    </Button>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Load More Button */}
+            {sortedTeachers.length > displayCount && (
+              <LoadMoreButton
+                onClick={handleLoadMore}
+                loading={isLoadingMore}
+                hasMore={sortedTeachers.length > displayCount}
+                language={language}
+                totalShown={Math.min(displayCount, sortedTeachers.length)}
+                totalAvailable={sortedTeachers.length}
+              />
+            )}
+
+            {/* Mobile Quick Actions - Below cards */}
+            {sortedTeachers.length > 0 && (
+              <div className="mt-6 lg:hidden">
+                <Card className="p-4 bg-teal-50 border-teal-200">
+                  <p className={`text-sm text-teal-800 mb-3 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                    প্রোফাইল দেখার পর আপনি শিক্ষকের সাথে চ্যাট, ভিডিও মিটিং বা হায়ারিং এগ্রিমেন্ট পাঠাতে পারবেন।
+                  </p>
+                </Card>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {sortedTeachers.length === 0 && (
+              <Card className="p-12 text-center">
+                <div className="text-gray-400 mb-4">
+                  <Search className="w-16 h-16 mx-auto mb-4" />
+                </div>
+                <h3 className={`text-gray-900 mb-2 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>কোনো শিক্ষক পাওয়া যায়নি</h3>
+                <p className={`text-gray-600 mb-4 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>অনুগ্রহ করে আপনার ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন</p>
+                <Button onClick={handleClearFilters} variant="outline" className={language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}>
+                  {t.clearFilters}
+                </Button>
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Dialogs */}
+      {selectedTeacher && (
+        <>
+          <ChatDialog
+            open={isChatOpen}
+            onOpenChange={setIsChatOpen}
+            conversation={mockConversations[0]} // Mock conversation
+            language={language}
+            currentUserId={currentUserId}
+            onSendMessage={handleSendMessage}
+            onScheduleVideo={() => {
+              setIsChatOpen(false);
+              setIsVideoMeetingOpen(true);
+            }}
+          />
+
+          <VideoMeetingDialog
+            open={isVideoMeetingOpen}
+            onOpenChange={setIsVideoMeetingOpen}
+            teacherName={selectedTeacher.name}
+            teacherId={selectedTeacher.id}
+            guardianId={currentUserId}
+            language={language}
+            teacherCredits={45} // Mock teacher credits
+            guardianCredits={currentUserCredits}
+            onSchedule={handleVideoScheduled}
+          />
+
+          <HiringAgreementDialog
+            open={isHiringOpen}
+            onOpenChange={setIsHiringOpen}
+            teacherName={selectedTeacher.name}
+            teacherId={selectedTeacher.id}
+            guardianId={currentUserId}
+            subjects={selectedTeacher.subjects}
+            language={language}
+            onSendAgreement={handleAgreementSent}
+          />
+        </>
+      )}
+
+      {/* Auth Dialog */}
+      <UnifiedAuthDialog
+        open={showAuthDialog}
+        onOpenChange={setShowAuthDialog}
+        language={language}
+        onLogin={onLogin || (() => {})}
+        initialMode="register"
+      />
+
+      <Footer language={language} setPage={setPage} />
+    </div>
+  );
+}

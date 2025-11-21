@@ -1,0 +1,1145 @@
+import { Card } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Header } from '../components/Header';
+import { Footer } from '../components/Footer';
+import { motion, useInView } from 'motion/react';
+import { 
+  Users, Search, FileText, CreditCard, MessageSquare, 
+  Star, Shield, Clock, Award, CheckCircle2, ArrowRight,
+  BookOpen, UserCheck, DollarSign, Target, TrendingUp,
+  Bell, Calendar, Video, Download, Calculator, Quote, 
+  Briefcase, GraduationCap, MapPin, Zap, Play
+} from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { UnifiedAuthDialog } from '../components/UnifiedAuthDialog';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '../components/ui/accordion';
+
+interface ForTeachersPageProps {
+  language: 'bn' | 'en';
+  setLanguage: (lang: 'bn' | 'en') => void;
+  setPage: (page: string) => void;
+  announcement?: { title: string; message: string; type: string } | null;
+  onLogin?: (type: 'teacher' | 'guardian' | 'student' | 'admin') => void;
+}
+
+const content = {
+  bn: {
+    title: 'শিক্ষকদের জন্য',
+    subtitle: 'আপনার শিক্ষকতার দক্ষতা দিয়ে উপার্জন করুন এবং আপনার ক্যারিয়ার গড়ুন',
+    startNow: 'এখনই শুরু করুন',
+    howItWorks: 'কীভাবে কাজ করে',
+    features: 'সুবিধাসমূহ',
+    benefits: 'উপকারিতা',
+    pricing: 'ক্রেডিট সিস্টেম',
+    faq: 'প্রশ্নোত্তর',
+  },
+  en: {
+    title: 'For Teachers',
+    subtitle: 'Earn with your teaching skills and build your career',
+    startNow: 'Start Now',
+    howItWorks: 'How It Works',
+    features: 'Features',
+    benefits: 'Benefits',
+    pricing: 'Credit System',
+    faq: 'FAQ',
+  }
+};
+
+const steps = [
+  {
+    icon: Users,
+    titleBn: 'রেজিস্ট্রেশন করুন',
+    titleEn: 'Register',
+    descBn: 'ফ্রিতে রেজিস্টার করুন এবং ৫০ ক্রেডিট পান',
+    descEn: 'Register for free and get 50 credits',
+    color: 'from-emerald-500 to-teal-500'
+  },
+  {
+    icon: FileText,
+    titleBn: 'প্রোফাইল তৈরি করুন',
+    titleEn: 'Create Profile',
+    descBn: 'আপনার যোগ্যতা এবং অভিজ্ঞতা যুক্ত করুন',
+    descEn: 'Add your qualifications and experience',
+    color: 'from-blue-500 to-cyan-500'
+  },
+  {
+    icon: Search,
+    titleBn: 'টিউশন খুঁজুন',
+    titleEn: 'Find Tuitions',
+    descBn: 'উপযুক্ত টিউশন খুঁজুন এবং আবেদন করুন',
+    descEn: 'Find suitable tuitions and apply',
+    color: 'from-emerald-500 to-teal-500'
+  },
+  {
+    icon: DollarSign,
+    titleBn: 'উপার্জন করুন',
+    titleEn: 'Start Earning',
+    descBn: 'পড়ান এবং সরাসরি অর্থ উপার্জন করুন',
+    descEn: 'Teach and earn money directly',
+    color: 'from-orange-500 to-red-500'
+  }
+];
+
+const features = [
+  {
+    icon: Shield,
+    titleBn: 'নিরাপদ প্ল্যাটফর্ম',
+    titleEn: 'Secure Platform',
+    descBn: 'সম্পূর্ণ সুরক্ষিত এবং বিশ্বস্ত',
+    descEn: 'Completely secure and trusted',
+    color: 'from-blue-500 to-cyan-500'
+  },
+  {
+    icon: Star,
+    titleBn: 'রিভিউ সিস্টেম',
+    titleEn: 'Review System',
+    descBn: 'ভালো রিভিউ পেয়ে জনপ্রিয় হন',
+    descEn: 'Get popular with good reviews',
+    color: 'from-emerald-500 to-teal-500'
+  },
+  {
+    icon: CreditCard,
+    titleBn: 'সরাসরি পেমেন্ট',
+    titleEn: 'Direct Payment',
+    descBn: 'মধ্যস্থতাকারী ছাড়াই পেমেন্ট পান',
+    descEn: 'Get payment without middleman',
+    color: 'from-emerald-500 to-teal-500'
+  },
+  {
+    icon: MessageSquare,
+    titleBn: 'সরাসরি যোগাযোগ',
+    titleEn: 'Direct Contact',
+    descBn: 'অভিভাবকদের সাথে সরাসরি চ্যাট',
+    descEn: 'Chat directly with guardians',
+    color: 'from-orange-500 to-red-500'
+  },
+  {
+    icon: Briefcase,
+    titleBn: 'নমনীয় সময়',
+    titleEn: 'Flexible Time',
+    descBn: 'আপনার সুবিধামত সময়ে কাজ করুন',
+    descEn: 'Work at your convenience',
+    color: 'from-rose-500 to-pink-500'
+  },
+  {
+    icon: Video,
+    titleBn: 'অনলাইন টিউশন',
+    titleEn: 'Online Tuition',
+    descBn: 'ঘরে বসে অনলাইনে পড়ান',
+    descEn: 'Teach online from home',
+    color: 'from-teal-500 to-cyan-500'
+  },
+  {
+    icon: Bell,
+    titleBn: 'নোটিফিকেশন',
+    titleEn: 'Notifications',
+    descBn: 'নতুন টিউশনের আপডেট পান',
+    descEn: 'Get updates on new tuitions',
+    color: 'from-teal-500 to-cyan-500'
+  },
+  {
+    icon: GraduationCap,
+    titleBn: 'ক্যারিয়ার গ্রোথ',
+    titleEn: 'Career Growth',
+    descBn: 'আপনার পোর্টফোলিও তৈরি করুন',
+    descEn: 'Build your portfolio',
+    color: 'from-amber-500 to-orange-500'
+  }
+];
+
+const benefits = [
+  {
+    titleBn: 'বেশি উপার্জন',
+    titleEn: 'Higher Earnings',
+    descBn: 'কোন কমিশন নেই, সরাসরি ১০০% পেমেন্ট',
+    descEn: 'No commission, get 100% payment directly',
+    icon: TrendingUp
+  },
+  {
+    titleBn: 'নমনীয়তা',
+    titleEn: 'Flexibility',
+    descBn: 'আপনার সময় এবং স্থান নিজে ঠিক করুন',
+    descEn: 'Choose your own time and location',
+    icon: Clock
+  },
+  {
+    titleBn: 'স্বচ্ছতা',
+    titleEn: 'Transparency',
+    descBn: 'সকল তথ্য স্পষ্ট এবং দৃশ্যমান',
+    descEn: 'All information clear and visible',
+    icon: Target
+  },
+  {
+    titleBn: 'স্বীকৃতি',
+    titleEn: 'Recognition',
+    descBn: 'রিভিউ এবং রেটিং দিয়ে সুনাম অর্জন করুন',
+    descEn: 'Earn reputation with reviews and ratings',
+    icon: Award
+  }
+];
+
+const pricingInfo = [
+  { titleBn: 'রেজিস্ট্রেশন বোনাস', titleEn: 'Registration Bonus', value: '৫০ ক্রেডিট', color: 'from-emerald-500 to-teal-500' },
+  { titleBn: 'টিউশনে আবেদন', titleEn: 'Apply to Tuition', value: '৫ ক্রেডিট', color: 'from-blue-500 to-cyan-500' },
+  { titleBn: 'অভিভাবক যোগাযোগ', titleEn: 'Contact Guardian', value: '৩ ক্রেডিট', color: 'from-emerald-500 to-teal-500' },
+  { titleBn: 'ক্রেডিট কিনুন', titleEn: 'Buy Credits', value: '১০০ টাকা = ১০০ ক্রেডিট', color: 'from-orange-500 to-red-500' }
+];
+
+const stats = [
+  { value: 10000, suffix: '+', labelBn: 'সক্রিয় অভিভাবক', labelEn: 'Active Guardians' },
+  { value: 15000, suffix: '+', labelBn: 'মাসিক টিউশন', labelEn: 'Monthly Tuitions' },
+  { value: 25000, suffix: '+', labelBn: 'গড় আয় (টাকা)', labelEn: 'Average Income (BDT)' },
+  { value: 95, suffix: '%', labelBn: 'সফলতার হার', labelEn: 'Success Rate' }
+];
+
+const testimonials = [
+  {
+    nameBn: 'মোঃ রফিক উদ্দিন',
+    nameEn: 'Md Rafiq Uddin',
+    locationBn: 'ঢাকা',
+    locationEn: 'Dhaka',
+    textBn: 'এই প্ল্যাটফর্মে মাসে ৩০-৪০ হাজার টাকা উপার্জন করছি। কোন কমিশন নেই!',
+    textEn: 'I earn 30-40 thousand BDT per month on this platform. No commission!',
+    rating: 5
+  },
+  {
+    nameBn: 'সাবিনা আক্তার',
+    nameEn: 'Sabina Akter',
+    locationBn: 'চট্টগ্রাম',
+    locationEn: 'Chittagong',
+    textBn: 'খুব সহজে টিউশন পাই। সিস্টেম অত্যন্ত সুবিধাজনক এবং নিরাপদ।',
+    textEn: 'Very easy to get tuitions. System is very convenient and safe.',
+    rating: 5
+  },
+  {
+    nameBn: 'জামিল হাসান',
+    nameEn: 'Jamil Hasan',
+    locationBn: 'সিলেট',
+    locationEn: 'Sylhet',
+    textBn: 'অনলাইন টিউশন সুবিধা অসাধারণ। ঘরে বসেই আয় করছি।',
+    textEn: 'Online tuition facility is amazing. Earning from home.',
+    rating: 5
+  }
+];
+
+const faqs = [
+  {
+    questionBn: 'রেজিস্ট্রেশন করতে কি প্রয়োজন?',
+    questionEn: 'What is needed for registration?',
+    answerBn: 'শুধু আপনার শিক্ষাগত যোগ্যতার সার্টিফিকেট এবং NID/পাসপোর্ট প্রয়োজন।',
+    answerEn: 'Only your educational certificates and NID/Passport are needed.'
+  },
+  {
+    questionBn: 'কতদিনে টিউশন পাওয়া যায়?',
+    questionEn: 'How soon can I get tuitions?',
+    answerBn: 'সাধারণত ৩-৭ দিনের মধ্যে প্রথম টিউশন পাওয়া যায়।',
+    answerEn: 'Usually you can get the first tuition within 3-7 days.'
+  },
+  {
+    questionBn: 'পেমেন্ট কিভাবে পাব?',
+    questionEn: 'How will I get payment?',
+    answerBn: 'সরাসরি অভিভাবকের কাছ থেকে bKash, রকেট, নগদ বা ব্যাংক ট্রান্সফারের মাধ্যমে।',
+    answerEn: 'Directly from guardian via bKash, Rocket, Nagad or Bank Transfer.'
+  },
+  {
+    questionBn: 'কোন কমিশন কাটা হয়?',
+    questionEn: 'Is there any commission?',
+    answerBn: 'না, আমরা কোন কমিশন কাটি না। শুধু ক্রেডিট সিস্টেম ব্যবহার করতে হয়।',
+    answerEn: 'No, we don\'t take any commission. Only credit system is used.'
+  },
+  {
+    questionBn: 'অনলাইন টিউশন করতে পারব?',
+    questionEn: 'Can I do online tuition?',
+    answerBn: 'হ্যাঁ, আমাদের বিল্ট-ইন ভিডিও মিটিং সিস্টেম রয়েছে।',
+    answerEn: 'Yes, we have a built-in video meeting system.'
+  },
+  {
+    questionBn: 'সাপোর্ট কিভাবে পাব?',
+    questionEn: 'How to get support?',
+    answerBn: 'আমাদের ২৪/৭ লাইভ চ্যাট সাপোর্ট রয়েছে।',
+    answerEn: 'We have 24/7 live chat support.'
+  }
+];
+
+// Counter Animation Component
+function AnimatedCounter({ value, suffix = '' }: { value: number; suffix?: string }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true });
+
+  useEffect(() => {
+    if (isInView) {
+      let start = 0;
+      const end = value;
+      const duration = 2000;
+      const increment = end / (duration / 16);
+
+      const timer = setInterval(() => {
+        start += increment;
+        if (start >= end) {
+          setCount(end);
+          clearInterval(timer);
+        } else {
+          setCount(Math.floor(start));
+        }
+      }, 16);
+
+      return () => clearInterval(timer);
+    }
+  }, [isInView, value]);
+
+  return (
+    <div ref={ref} className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+      {count.toLocaleString()}{suffix}
+    </div>
+  );
+}
+
+export function ForTeachersPage({ language, setLanguage, setPage, announcement, onLogin }: ForTeachersPageProps) {
+  const t = content[language];
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [creditCalc, setCreditCalc] = useState({ applications: 3, contacts: 2 });
+
+  const handleGetStarted = () => {
+    setAuthDialogOpen(true);
+  };
+
+  const handleAuthSuccess = (type: 'teacher' | 'guardian' | 'student' | 'admin') => {
+    setAuthDialogOpen(false);
+    if (onLogin) {
+      onLogin(type);
+    } else {
+      setPage('teacher-dashboard');
+    }
+  };
+
+  const calculateTotalCredits = () => {
+    return (creditCalc.applications * 5) + (creditCalc.contacts * 3);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
+      <Header language={language} setLanguage={setLanguage} setPage={setPage} announcement={announcement} onLogin={onLogin} />
+
+      {/* Modern Auth Dialog */}
+      <UnifiedAuthDialog
+        open={authDialogOpen}
+        onOpenChange={setAuthDialogOpen}
+        language={language}
+        onLogin={handleAuthSuccess}
+        initialMode="register"
+      />
+
+      <div className="container mx-auto px-4 py-16">
+        {/* Hero Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-20 relative"
+        >
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-r from-emerald-200 to-teal-200 rounded-full blur-3xl opacity-30 animate-pulse"></div>
+          
+          <div className="relative">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="inline-block bg-gradient-to-r from-emerald-100 to-teal-100 px-6 py-3 rounded-full mb-6 shadow-lg"
+            >
+              <span className={`text-emerald-700 flex items-center gap-2 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                <Zap className="w-4 h-4" />
+                {language === 'bn' ? '১৫,০০০+ মাসিক টিউশন' : '15,000+ Monthly Tuitions'}
+              </span>
+            </motion.div>
+            
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className={`text-gray-900 mb-6 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+            >
+              {t.title}
+            </motion.h1>
+            
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.6 }}
+              className={`text-gray-600 text-xl max-w-3xl mx-auto leading-relaxed mb-8 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+            >
+              {t.subtitle}
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.6 }}
+            >
+              <Button
+                onClick={handleGetStarted}
+                className={`bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-8 py-6 text-lg hover:from-emerald-700 hover:to-teal-700 shadow-xl hover:shadow-2xl transition-all duration-300 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+              >
+                {t.startNow}
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* How It Works */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mb-20"
+        >
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className={`text-gray-900 mb-4 text-center ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+          >
+            {t.howItWorks}
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            className={`text-gray-600 text-center mb-10 text-lg ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+          >
+            {language === 'bn' ? 'মাত্র ৪টি ধাপে শুরু করুন' : 'Start in just 4 steps'}
+          </motion.p>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {steps.map((step, i) => {
+              const Icon = step.icon;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.6 }}
+                  whileHover={{ y: -10 }}
+                >
+                  <Card className="p-6 text-center hover:shadow-xl transition-all duration-500 group relative overflow-hidden h-full">
+                    <motion.div
+                      className={`absolute inset-0 bg-gradient-to-br ${step.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
+                    />
+                    
+                    <div className="relative mb-4">
+                      <div className={`w-16 h-16 mx-auto bg-gradient-to-br ${step.color} rounded-2xl flex items-center justify-center shadow-lg`}>
+                        <Icon className="w-8 h-8 text-white" />
+                      </div>
+                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md">
+                        <span className="text-sm font-bold text-gray-700">{i + 1}</span>
+                      </div>
+                    </div>
+                    
+                    <h3 className={`font-semibold text-gray-900 mb-2 relative ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      {language === 'bn' ? step.titleBn : step.titleEn}
+                    </h3>
+                    <p className={`text-gray-600 text-sm leading-relaxed relative ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      {language === 'bn' ? step.descBn : step.descEn}
+                    </p>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
+
+        {/* Features */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mb-20"
+        >
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className={`text-gray-900 mb-10 text-center ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+          >
+            {t.features}
+          </motion.h2>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {features.map((feature, i) => {
+              const Icon = feature.icon;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05, duration: 0.5 }}
+                  whileHover={{ y: -10 }}
+                >
+                  <Card className="p-6 hover:shadow-xl transition-all duration-500 group relative overflow-hidden h-full">
+                    <motion.div
+                      className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
+                    />
+                    
+                    <motion.div
+                      className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-4 shadow-md`}
+                      whileHover={{ scale: 1.1, rotate: 360 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <Icon className="w-6 h-6 text-white" />
+                    </motion.div>
+                    
+                    <h4 className={`font-semibold text-gray-900 mb-2 relative ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      {language === 'bn' ? feature.titleBn : feature.titleEn}
+                    </h4>
+                    <p className={`text-gray-600 text-sm relative ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      {language === 'bn' ? feature.descBn : feature.descEn}
+                    </p>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
+
+        {/* Benefits */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mb-20"
+        >
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className={`text-gray-900 mb-10 text-center ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+          >
+            {t.benefits}
+          </motion.h2>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {benefits.map((benefit, i) => {
+              const Icon = benefit.icon;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.6 }}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <Card className="p-6 text-center hover:shadow-xl transition-all duration-500 group bg-white h-full">
+                    <motion.div
+                      className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <Icon className="w-8 h-8 text-white" />
+                    </motion.div>
+                    <h4 className={`font-semibold text-gray-900 mb-2 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      {language === 'bn' ? benefit.titleBn : benefit.titleEn}
+                    </h4>
+                    <p className={`text-gray-600 text-sm ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      {language === 'bn' ? benefit.descBn : benefit.descEn}
+                    </p>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
+
+        {/* Pricing/Credit System */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mb-20"
+        >
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className={`text-gray-900 mb-4 text-center ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+          >
+            {t.pricing}
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            className={`text-gray-600 text-center mb-10 text-lg ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+          >
+            {language === 'bn' ? 'সহজ এবং স্বচ্ছ ক্রেডিট সিস্টেম' : 'Simple and transparent credit system'}
+          </motion.p>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+            {pricingInfo.map((info, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+                whileHover={{ scale: 1.05, y: -5 }}
+              >
+                <Card className="p-6 text-center hover:shadow-xl transition-all duration-500 group relative overflow-hidden">
+                  <motion.div
+                    className={`absolute inset-0 bg-gradient-to-br ${info.color} opacity-5 group-hover:opacity-10 transition-opacity`}
+                  />
+                  <div className={`text-3xl font-bold bg-gradient-to-r ${info.color} bg-clip-text text-transparent mb-2 relative`}>
+                    {info.value}
+                  </div>
+                  <div className={`text-gray-600 text-sm relative ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                    {language === 'bn' ? info.titleBn : info.titleEn}
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            className="text-center mt-8"
+          >
+            <Card className="p-6 bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 max-w-2xl mx-auto">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <h4 className="font-semibold text-gray-900">
+                  {language === 'bn' ? 'বিশেষ সুবিধা' : 'Special Benefits'}
+                </h4>
+              </div>
+              <p className="text-gray-600 text-sm">
+                {language === 'bn' 
+                  ? 'রেজিস্ট্রেশনের সাথে সাথে ৫০ ক্রেডিট ফ্রি! কোন লুকানো চার্জ নেই।'
+                  : '50 credits free with registration! No hidden charges.'}
+              </p>
+            </Card>
+          </motion.div>
+        </motion.div>
+
+        {/* Statistics Section - Enhanced */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mb-20"
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-10"
+          >
+            <h2 className={`text-gray-900 mb-3 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+              {language === 'bn' ? 'আমাদের সাফল্য' : 'Our Success'}
+            </h2>
+            <p className={`text-gray-600 text-lg ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+              {language === 'bn' 
+                ? 'সংখ্যায় Talent Tutor এর বিশ্বাসযোগ্যতা' 
+                : 'Talent Tutor by numbers'}
+            </p>
+          </motion.div>
+
+          <Card className="p-12 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 text-white relative overflow-hidden shadow-2xl">
+            {/* Animated Background Elements */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl opacity-10 animate-pulse"></div>
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '1s' }}></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white rounded-full blur-3xl opacity-5"></div>
+            
+            <div className="relative grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {stats.map((stat, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.6 }}
+                  className="text-center group"
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.3 }}
+                    className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all"
+                  >
+                    <div className="mb-4">
+                      {i === 0 && <Users className="w-10 h-10 mx-auto text-white" />}
+                      {i === 1 && <Briefcase className="w-10 h-10 mx-auto text-white" />}
+                      {i === 2 && <DollarSign className="w-10 h-10 mx-auto text-white" />}
+                      {i === 3 && <TrendingUp className="w-10 h-10 mx-auto text-white" />}
+                    </div>
+                    <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+                    <p className={`text-emerald-100 mt-3 font-medium ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      {language === 'bn' ? stat.labelBn : stat.labelEn}
+                    </p>
+                  </motion.div>
+                </motion.div>
+              ))}
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* Testimonials Carousel - Enhanced */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mb-20"
+        >
+          <div className="text-center mb-12">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-100 to-teal-100 px-6 py-3 rounded-full mb-6 shadow-md"
+            >
+              <Star className="w-5 h-5 text-emerald-600 fill-emerald-600" />
+              <span className={`text-emerald-700 font-medium ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                {language === 'bn' ? 'সন্তুষ্ট শিক্ষক' : 'Happy Teachers'}
+              </span>
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className={`text-gray-900 mb-4 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+            >
+              {language === 'bn' ? 'শিক্ষকদের মতামত' : 'Teacher Testimonials'}
+            </motion.h2>
+            
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className={`text-gray-600 text-lg ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+            >
+              {language === 'bn' 
+                ? 'যারা ইতিমধ্যে আমাদের সাথে যুক্ত তাদের অভিজ্ঞতা' 
+                : 'Experiences from teachers already with us'}
+            </motion.p>
+          </div>
+
+          <Card className="p-10 max-w-4xl mx-auto relative overflow-hidden shadow-xl bg-gradient-to-br from-white to-emerald-50">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-200 rounded-full blur-3xl opacity-30"></div>
+            <Quote className="absolute top-8 left-8 w-16 h-16 text-emerald-200 opacity-50" />
+            
+            <div className="relative z-10">
+              <motion.div
+                key={currentTestimonial}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="mb-6 flex justify-center gap-1">
+                  {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
+                    <Star key={i} className="w-6 h-6 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+                
+                <p className={`text-gray-700 text-xl mb-8 text-center leading-relaxed px-8 italic ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                  "{language === 'bn' 
+                    ? testimonials[currentTestimonial].textBn 
+                    : testimonials[currentTestimonial].textEn}"
+                </p>
+                
+                <div className="flex items-center justify-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                    {(language === 'bn' 
+                      ? testimonials[currentTestimonial].nameBn 
+                      : testimonials[currentTestimonial].nameEn
+                    ).charAt(0)}
+                  </div>
+                  <div className="text-left">
+                    <p className={`font-semibold text-gray-900 text-lg ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      {language === 'bn' 
+                        ? testimonials[currentTestimonial].nameBn 
+                        : testimonials[currentTestimonial].nameEn}
+                    </p>
+                    <p className={`text-gray-600 flex items-center gap-1 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      <MapPin className="w-4 h-4" />
+                      {language === 'bn' 
+                        ? testimonials[currentTestimonial].locationBn 
+                        : testimonials[currentTestimonial].locationEn}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              <div className="flex justify-center gap-3 mt-8">
+                {testimonials.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentTestimonial(i)}
+                    className={`transition-all rounded-full ${
+                      i === currentTestimonial 
+                        ? 'w-12 h-3 bg-gradient-to-r from-emerald-600 to-teal-600' 
+                        : 'w-3 h-3 bg-gray-300 hover:bg-gray-400'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* Credit Calculator - Enhanced */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mb-20"
+        >
+          <div className="text-center mb-12">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-100 to-teal-100 px-6 py-3 rounded-full mb-6 shadow-md"
+            >
+              <Calculator className="w-5 h-5 text-emerald-600" />
+              <span className="text-emerald-700 font-medium">
+                {language === 'bn' ? 'খরচ হিসাব' : 'Cost Calculation'}
+              </span>
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-gray-900 mb-4"
+            >
+              {language === 'bn' ? 'ক্রেডিট ক্যালকুলেটর' : 'Credit Calculator'}
+            </motion.h2>
+            
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="text-gray-600 text-lg"
+            >
+              {language === 'bn' 
+                ? 'আপনার প্রয়োজন অনুয়ায়ী ক্রেডিট খরচ দেখুন' 
+                : 'See credit cost based on your needs'}
+            </motion.p>
+          </div>
+
+          <Card className="p-10 max-w-3xl mx-auto shadow-xl bg-gradient-to-br from-white to-emerald-50">
+            <div className="flex items-center gap-3 mb-8 justify-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center shadow-lg">
+                <Calculator className="w-6 h-6 text-white" />
+              </div>
+              <p className="text-gray-700 font-medium text-lg">
+                {language === 'bn' 
+                  ? 'আপনার খরচ হিসাব করুন' 
+                  : 'Calculate your cost'}
+              </p>
+            </div>
+
+            <div className="space-y-8">
+              <div className="bg-white rounded-xl p-6 shadow-sm">
+                <label className={`block text-base font-semibold text-gray-800 mb-4 flex items-center gap-2 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                  <Briefcase className="w-5 h-5 text-emerald-600" />
+                  {language === 'bn' ? 'টিউশন আবেদন সংখ্যা' : 'Number of Tuition Applications'}
+                </label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min="1"
+                    max="20"
+                    value={creditCalc.applications}
+                    onChange={(e) => setCreditCalc({ ...creditCalc, applications: parseInt(e.target.value) })}
+                    className="flex-1 h-2 bg-emerald-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+                  />
+                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                    {creditCalc.applications}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 shadow-sm">
+                <label className={`block text-base font-semibold text-gray-800 mb-4 flex items-center gap-2 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                  <Users className="w-5 h-5 text-teal-600" />
+                  {language === 'bn' ? 'অভিভাবক যোগাযোগ সংখ্যা' : 'Number of Guardian Contacts'}
+                </label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min="1"
+                    max="20"
+                    value={creditCalc.contacts}
+                    onChange={(e) => setCreditCalc({ ...creditCalc, contacts: parseInt(e.target.value) })}
+                    className="flex-1 h-2 bg-teal-200 rounded-lg appearance-none cursor-pointer accent-teal-600"
+                  />
+                  <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                    {creditCalc.contacts}
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-8 border-t-2 border-gray-200">
+                <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-6 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className={`text-gray-700 font-medium flex items-center gap-2 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      <Briefcase className="w-4 h-4" />
+                      {language === 'bn' ? 'টিউশন আবেদন:' : 'Tuition Applications:'}
+                    </span>
+                    <span className={`font-semibold text-gray-900 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      {creditCalc.applications} × 5 = <span className="text-emerald-600">{creditCalc.applications * 5}</span> {language === 'bn' ? 'ক্রেডিট' : 'credits'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className={`text-gray-700 font-medium flex items-center gap-2 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      <Users className="w-4 h-4" />
+                      {language === 'bn' ? 'অভিভাবক যোগাযোগ:' : 'Guardian Contacts:'}
+                    </span>
+                    <span className={`font-semibold text-gray-900 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      {creditCalc.contacts} × 3 = <span className="text-teal-600">{creditCalc.contacts * 3}</span> {language === 'bn' ? 'ক্রেডিট' : 'credits'}
+                    </span>
+                  </div>
+                  
+                  <div className="pt-4 border-t border-emerald-200">
+                    <div className="flex justify-between items-center">
+                      <span className={`font-bold text-gray-900 text-lg ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                        {language === 'bn' ? 'মোট প্রয়োজন:' : 'Total Required:'}
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <CreditCard className="w-6 h-6 text-emerald-600" />
+                        <span className="font-bold text-3xl bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                          {calculateTotalCredits()}
+                        </span>
+                        <span className={`text-gray-600 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{language === 'bn' ? 'ক্রেডিট' : 'credits'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`mt-6 p-4 rounded-xl ${calculateTotalCredits() <= 50 ? 'bg-green-50 border-2 border-green-200' : 'bg-amber-50 border-2 border-amber-200'}`}>
+                  <div className="flex items-start gap-3">
+                    {calculateTotalCredits() <= 50 ? (
+                      <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                    ) : (
+                      <Award className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+                    )}
+                    <div>
+                      <p className={`font-semibold ${calculateTotalCredits() <= 50 ? 'text-green-900' : 'text-amber-900'} ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                        {language === 'bn' ? 'রেজিস্ট্রেশন বোনাস: ৫০ ক্রেডিট ফ্রি!' : 'Registration Bonus: 50 Credits Free!'}
+                      </p>
+                      <p className={`text-sm mt-1 ${calculateTotalCredits() <= 50 ? 'text-green-700' : 'text-amber-700'} ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                        {language === 'bn' 
+                          ? calculateTotalCredits() <= 50 
+                            ? '✨ দারুণ! আপনার কোন খরচ লাগবে না।' 
+                            : `💡 আরও ${calculateTotalCredits() - 50} ক্রেডিট কিনতে হবে (${calculateTotalCredits() - 50} টাকা)।`
+                          : calculateTotalCredits() <= 50 
+                            ? '✨ Great! You won\'t need to buy any.' 
+                            : `💡 You need to buy ${calculateTotalCredits() - 50} more credits (${calculateTotalCredits() - 50} BDT).`}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* FAQ Section - Enhanced Design */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mb-20"
+        >
+          <div className="text-center mb-12">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-100 to-teal-100 px-6 py-3 rounded-full mb-6 shadow-md"
+            >
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              <span className={`text-emerald-700 font-medium ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{t.faq}</span>
+            </motion.div>
+            
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className={`text-gray-900 mb-4 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+            >
+              {language === 'bn' ? 'সাধারণ প্রশ্নোত্তর' : 'Frequently Asked Questions'}
+            </motion.h2>
+            
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className={`text-gray-600 text-lg max-w-2xl mx-auto ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+            >
+              {language === 'bn' 
+                ? 'শিক্ষকদের সবচেয়ে জিজ্ঞাসিত প্রশ্নের উত্তর' 
+                : 'Most asked questions by teachers'}
+            </motion.p>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <Accordion type="single" collapsible className="space-y-4">
+              {faqs.map((faq, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05, duration: 0.5 }}
+                >
+                  <AccordionItem 
+                    value={`item-${i}`} 
+                    className="border border-gray-200 rounded-xl px-6 bg-white shadow-sm hover:shadow-md transition-all"
+                  >
+                    <AccordionTrigger className="hover:no-underline py-5">
+                      <div className="flex items-start gap-3 text-left">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0 mt-0.5">
+                          {i + 1}
+                        </div>
+                        <span className={`font-medium text-gray-900 leading-relaxed ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                          {language === 'bn' ? faq.questionBn : faq.questionEn}
+                        </span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className={`text-gray-600 leading-relaxed pt-2 pl-11 pb-5 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      {language === 'bn' ? faq.answerBn : faq.answerEn}
+                    </AccordionContent>
+                  </AccordionItem>
+                </motion.div>
+              ))}
+            </Accordion>
+          </div>
+
+          {/* Need More Help Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="mt-10 max-w-4xl mx-auto"
+          >
+            <Card className="p-8 bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-100">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
+                    <MessageSquare className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">
+                      {language === 'bn' ? 'আরো সাহায্য প্রয়োজন?' : 'Need More Help?'}
+                    </h4>
+                    <p className="text-gray-600 text-sm">
+                      {language === 'bn' 
+                        ? 'আমাদের সাপোর্ট টিম ২৪/৭ আপনার সেবায় নিয়োজিত' 
+                        : 'Our support team is available 24/7'}
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 shadow-md"
+                  onClick={() => setPage && setPage('help-center')}
+                >
+                  {language === 'bn' ? 'সাপোর্টে যোগাযোগ করুন' : 'Contact Support'}
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </div>
+            </Card>
+          </motion.div>
+        </motion.div>
+
+        {/* CTA Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="text-center"
+        >
+          <Card className="p-12 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl opacity-10"></div>
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl opacity-10"></div>
+            
+            <div className="relative">
+              <motion.h2
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="text-white mb-4"
+              >
+                {language === 'bn' ? 'আজই যোগ দিন' : 'Join Today'}
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+                className="text-emerald-50 text-lg mb-8 max-w-2xl mx-auto"
+              >
+                {language === 'bn'
+                  ? 'হাজারো অভিভাবক আপনার মত শিক্ষকের খোঁজ করছেন। আজই শুরু করুন!'
+                  : 'Thousands of guardians are looking for teachers like you. Start today!'}
+              </motion.p>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  onClick={handleGetStarted}
+                  className="bg-white text-emerald-600 px-8 py-6 text-lg hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300"
+                >
+                  {language === 'bn' ? 'ফ্রি রেজিস্ট্রেশন করুন' : 'Free Registration'}
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </motion.div>
+            </div>
+          </Card>
+        </motion.div>
+      </div>
+
+      <Footer language={language} setPage={setPage} />
+    </div>
+  );
+}
