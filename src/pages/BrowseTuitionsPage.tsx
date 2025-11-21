@@ -554,13 +554,21 @@ export function BrowseTuitionsPage({
       />
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white py-12">
-        <div className="container mx-auto px-4">
+      <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white py-12 sm:py-16">
+        {/* Background Decorations */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-20 -right-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-teal-400/20 rounded-full blur-3xl"></div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsIDI1NSwgMjU1LCAwLjA1KSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20"></div>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl">
             <Button
               variant="ghost"
+              size="sm"
               onClick={() => setPage(userRole === 'teacher' ? 'teacher-dashboard' : 'home')}
-              className="text-white hover:bg-white/20 mb-4"
+              className={`text-white hover:bg-white/20 mb-4 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               {userRole === 'teacher' ? t.backToDashboard : t.backToHome}
@@ -570,33 +578,54 @@ export function BrowseTuitionsPage({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <h1 className="text-white mb-2">{t.title}</h1>
-              <p className="text-xl text-white/90 mb-6">{t.subtitle}</p>
+              <h1 className={`text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                {t.title}
+              </h1>
+              <p className={`text-lg md:text-xl text-teal-50 mb-8 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                {t.subtitle}
+              </p>
 
-              {/* Stats */}
-              <div className="flex flex-wrap gap-6 mb-6">
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                  <TrendingUp className="w-5 h-5" />
-                  <span>৫০০+ {t.activeTuitions}</span>
+              {/* Stats Cards */}
+              <div className="flex flex-wrap gap-4 mb-8">
+                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 px-5 py-3 rounded-xl shadow-lg hover:bg-white/20 transition-colors">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <TrendingUp className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold">৫০০+</div>
+                    <div className={`text-xs text-teal-100 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{t.activeTuitions}</div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                  <Zap className="w-5 h-5" />
-                  <span>২০+ {t.todayPosted}</span>
+                
+                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 px-5 py-3 rounded-xl shadow-lg hover:bg-white/20 transition-colors">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <Zap className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold">২০+</div>
+                    <div className={`text-xs text-teal-100 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{t.todayPosted}</div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                  <Target className="w-5 h-5" />
-                  <span>{matchedCount} {t.matchedJobs}</span>
+
+                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 px-5 py-3 rounded-xl shadow-lg hover:bg-white/20 transition-colors">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <Target className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold">{matchedCount}</div>
+                    <div className={`text-xs text-teal-100 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{t.matchedJobs}</div>
+                  </div>
                 </div>
               </div>
 
               {/* Search Bar */}
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <div className="relative max-w-2xl">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
                 <Input
                   placeholder={t.search}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 h-12 bg-white/95 backdrop-blur-sm border-0 shadow-lg text-gray-900 placeholder:text-gray-500"
+                  className={`pl-12 h-14 bg-white/95 backdrop-blur-xl border-0 shadow-2xl text-gray-900 placeholder:text-gray-500 rounded-xl focus-visible:ring-2 focus-visible:ring-teal-400 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
                 />
               </div>
             </motion.div>

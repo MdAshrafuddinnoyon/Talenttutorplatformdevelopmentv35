@@ -27,7 +27,9 @@ import {
   Calendar,
   Target,
   Zap,
-  GraduationCap
+  GraduationCap,
+  SlidersHorizontal,
+  X
 } from 'lucide-react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
@@ -37,7 +39,8 @@ import { HiringAgreementDialog } from '../components/HiringAgreementDialog';
 import { UnifiedAuthDialog } from '../components/UnifiedAuthDialog';
 import { LoadMoreButton } from '../components/LoadMoreButton';
 import { BangladeshLocationSelector } from '../components/BangladeshLocationSelector';
-import { motion } from 'motion/react';
+import { AIMatchmaker } from '../components/AIMatchmaker';
+import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner@2.0.3';
 import { teachersDatabase, type Teacher } from '../utils/teachersData';
 import { mockConversations, mockUserCredits } from '../utils/upworkFeatures';
@@ -46,6 +49,7 @@ import { subjectCategories, allSubjects as subjectsFromData } from '../utils/sub
 import { mediums, mediumLabels } from '../utils/mediumData';
 import { getLocationById } from '../utils/bangladeshLocations';
 import { teachersAPI } from '../utils/databaseService';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter, SheetClose } from '../components/ui/sheet';
 
 interface FindTeachersPageProps {
   language: 'bn' | 'en';
@@ -102,6 +106,7 @@ const content = {
     startChat: 'চ্যাট শুরু করুন',
     scheduleVideo: 'ভিডিও মিটিং',
     sendHiring: 'হায়ারিং এগ্রিমেন্ট',
+    applyFilters: 'ফিল্টার প্রয়োগ করুন',
   },
   en: {
     title: 'Find Teachers',
@@ -144,6 +149,7 @@ const content = {
     scheduleVideo: 'Video Meeting',
     sendHiring: 'Hiring Agreement',
     highestRate: 'Highest Rate',
+    applyFilters: 'Apply Filters',
   },
 };
 
@@ -162,6 +168,7 @@ export function FindTeachersPage({
   const t = content[language];
   
   const [teachers, setTeachers] = useState<Teacher[]>(teachersDatabase);
+  const [originalTeachers, setOriginalTeachers] = useState<Teacher[]>(teachersDatabase);
   const [isLoadingTeachers, setIsLoadingTeachers] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMedium, setSelectedMedium] = useState<string>('all');
@@ -177,6 +184,7 @@ export function FindTeachersPage({
   const [topRatedOnly, setTopRatedOnly] = useState(false);
   const [sortBy, setSortBy] = useState('recommended');
   const [savedTeachers, setSavedTeachers] = useState<string[]>([]);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   
   // Pagination states
   const [displayCount, setDisplayCount] = useState(12); // Show 12 initially
@@ -221,13 +229,16 @@ export function FindTeachersPage({
             responseTime: '< 1 hour'
           }));
           setTeachers(formattedTeachers);
+          setOriginalTeachers(formattedTeachers);
         } else {
           // Fallback to static data
           setTeachers(teachersDatabase);
+          setOriginalTeachers(teachersDatabase);
         }
       } catch (error) {
         console.info('Using fallback teacher data (database not yet configured):', error);
         setTeachers(teachersDatabase);
+        setOriginalTeachers(teachersDatabase);
       } finally {
         setIsLoadingTeachers(false);
       }
@@ -314,6 +325,7 @@ export function FindTeachersPage({
     setVerifiedOnly(false);
     setTopRatedOnly(false);
     setSortBy('recommended');
+    setTeachers(originalTeachers);
   };
 
   const handleLoadMore = () => {
@@ -486,6 +498,185 @@ export function FindTeachersPage({
     }
   };
 
+  const handleAIMatchFound = (matches: Teacher[]) => {
+    if (matches.length > 0) {
+      setTeachers(matches);
+      toast.success(language === 'bn' ? 'AI আপনার জন্য শিক্ষক খুঁজে পেয়েছে!' : 'AI found teachers for you!');
+    } else {
+      // Reset if cleared
+      setTeachers(originalTeachers);
+    }
+  };
+
+  const FilterContent = () => (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-3 lg:hidden">
+        <h3 className={`text-gray-900 flex items-center gap-2 text-base font-semibold ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+          {t.filters}
+        </h3>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleClearFilters}
+          className={`text-teal-600 hover:text-teal-700 text-xs px-2 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+        >
+          {t.clearFilters}
+        </Button>
+      </div>
+
+      {/* Location Filter - Bangladesh Location Selector */}
+      <div>
+        <label className={`text-sm font-medium text-gray-700 mb-2 block ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+          {t.location}
+        </label>
+        <BangladeshLocationSelector
+          value={selectedLocation}
+          onChange={(location) => setSelectedLocation({
+            division: location.division,
+            district: location.district,
+            area: location.area
+          })}
+          showSearch={true}
+          showAreaLevel={true}
+          language={language}
+          compact={true}
+        />
+      </div>
+
+      {/* Medium Filter */}
+      <div>
+        <label className={`text-sm font-medium text-gray-700 mb-2 block ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+          {t.medium}
+        </label>
+        <Select value={selectedMedium || 'all'} onValueChange={(value) => setSelectedMedium(value || 'all')}>
+          <SelectTrigger className={`w-full ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+            <SelectValue placeholder={t.allMediums} />
+          </SelectTrigger>
+          <SelectContent className={language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}>
+            <SelectItem value="all">{t.allMediums}</SelectItem>
+            {mediums.map(medium => (
+              <SelectItem key={medium.id} value={medium.id}>
+                {medium.icon} {language === 'bn' ? medium.name.bn : medium.name.en}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Subject Filter - Enhanced with Categories */}
+      <div>
+        <label className={`text-sm font-medium text-gray-700 mb-2 block ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+          {t.subject}
+        </label>
+        <Select value={selectedSubject || 'all'} onValueChange={(value) => setSelectedSubject(value || 'all')}>
+          <SelectTrigger className={`w-full ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+            <SelectValue placeholder={t.allSubjects} />
+          </SelectTrigger>
+          <SelectContent className={`${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''} max-h-[400px]`}>
+            <SelectItem value="all">{t.allSubjects}</SelectItem>
+            
+            {/* Subject Categories */}
+            {subjectCategories.map((category) => {
+              const categorySubjects = subjectsFromData.filter(s => s.category === category.id);
+              if (categorySubjects.length === 0) return null;
+              
+              return (
+                <div key={category.id}>
+                  <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50">
+                    {language === 'bn' ? category.name_bn : category.name_en}
+                  </div>
+                  {categorySubjects.map(subject => (
+                    <SelectItem key={subject.id} value={subject.id}>
+                      {language === 'bn' ? subject.name_bn : subject.name_en}
+                    </SelectItem>
+                  ))}
+                </div>
+              );
+            })}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Class Filter */}
+      <div>
+        <label className={`text-sm font-medium text-gray-700 mb-2 block ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+          {t.class}
+        </label>
+        <Select value={selectedClass || 'all'} onValueChange={(value) => setSelectedClass(value || 'all')}>
+          <SelectTrigger className={`w-full ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+            <SelectValue placeholder={t.allClasses} />
+          </SelectTrigger>
+          <SelectContent className={language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}>
+            <SelectItem value="all">{t.allClasses}</SelectItem>
+            {allClasses.map(cls => (
+              <SelectItem key={cls} value={cls}>{cls}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <Separator />
+
+      {/* Hourly Rate Range */}
+      <div>
+        <label className="text-sm font-medium text-gray-700 mb-3 block">
+          {t.hourlyRate}
+        </label>
+        <div className="space-y-3">
+          <Slider
+            min={0}
+            max={1500}
+            step={50}
+            value={hourlyRateRange}
+            onValueChange={setHourlyRateRange}
+          />
+          <div className="flex items-center justify-between text-sm text-gray-600">
+            <span>৳{hourlyRateRange[0].toLocaleString()}</span>
+            <span>৳{hourlyRateRange[1].toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Preferences */}
+      <div>
+        <label className="text-sm font-medium text-gray-700 mb-3 block">
+          পছন্দসমূহ
+        </label>
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="verified"
+              checked={verifiedOnly}
+              onCheckedChange={(checked) => setVerifiedOnly(checked as boolean)}
+            />
+            <label htmlFor="verified" className="text-sm text-gray-700 cursor-pointer flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-blue-600" />
+              {t.verified}
+            </label>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="topRated"
+              checked={topRatedOnly}
+              onCheckedChange={(checked) => setTopRatedOnly(checked as boolean)}
+            />
+            <label htmlFor="topRated" className="text-sm text-gray-700 cursor-pointer flex items-center gap-2">
+              <Award className="w-4 h-4 text-yellow-600" />
+              {t.topRated}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <Button className="w-full lg:hidden mt-4" onClick={() => setIsMobileFiltersOpen(false)}>
+        {t.applyFilters}
+      </Button>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-teal-50">
       <Header
@@ -547,18 +738,40 @@ export function FindTeachersPage({
                     className="pl-10 h-10 bg-white/95 backdrop-blur-sm border-0 shadow-lg text-gray-900 placeholder:text-gray-500 text-sm"
                   />
                 </div>
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-full sm:w-44 h-10 bg-white/95 backdrop-blur-sm border-0 shadow-lg text-gray-900 text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="recommended">{t.recommended}</SelectItem>
-                    <SelectItem value="highestRated">{t.highestRated}</SelectItem>
-                    <SelectItem value="mostReviews">{t.mostReviews}</SelectItem>
-                    <SelectItem value="lowestRate">{t.lowestRate}</SelectItem>
-                    <SelectItem value="highestRate">{t.highestRate}</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-full sm:w-44 h-10 bg-white/95 backdrop-blur-sm border-0 shadow-lg text-gray-900 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recommended">{t.recommended}</SelectItem>
+                      <SelectItem value="highestRated">{t.highestRated}</SelectItem>
+                      <SelectItem value="mostReviews">{t.mostReviews}</SelectItem>
+                      <SelectItem value="lowestRate">{t.lowestRate}</SelectItem>
+                      <SelectItem value="highestRate">{t.highestRate}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  {/* Mobile Filter Toggle */}
+                  <Sheet open={isMobileFiltersOpen} onOpenChange={setIsMobileFiltersOpen}>
+                    <SheetTrigger asChild>
+                      <Button 
+                        variant="secondary" 
+                        className="lg:hidden h-10 bg-white/95 backdrop-blur-sm border-0 shadow-lg text-gray-900"
+                      >
+                        <SlidersHorizontal className="w-4 h-4" />
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
+                      <SheetHeader>
+                        <SheetTitle className={language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}>{t.filters}</SheetTitle>
+                      </SheetHeader>
+                      <div className="mt-6">
+                        <FilterContent />
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -566,10 +779,15 @@ export function FindTeachersPage({
       </div>
 
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-5">
-          {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
-            <Card className="p-4 sm:p-5 sticky top-4">
+        <AIMatchmaker 
+          teachers={originalTeachers} 
+          onMatchFound={handleAIMatchFound} 
+          language={language} 
+        />
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-5" id="teacher-results">
+          {/* Filters Sidebar - Desktop */}
+          <div className="hidden lg:block lg:col-span-1">
+            <Card className="p-4 sm:p-5 sticky top-24">
               <div className="flex items-center justify-between mb-3">
                 <h3 className={`text-gray-900 flex items-center gap-2 text-base ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
                   <Filter className="w-4 h-4" />
@@ -584,157 +802,7 @@ export function FindTeachersPage({
                   {t.clearFilters}
                 </Button>
               </div>
-
-              <div className="space-y-4">
-                {/* Location Filter - Bangladesh Location Selector */}
-                <div>
-                  <label className={`text-sm font-medium text-gray-700 mb-2 block ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
-                    {t.location}
-                  </label>
-                  <BangladeshLocationSelector
-                    value={selectedLocation}
-                    onChange={(location) => setSelectedLocation({
-                      division: location.division,
-                      district: location.district,
-                      area: location.area
-                    })}
-                    showSearch={true}
-                    showAreaLevel={true}
-                    language={language}
-                    compact={true}
-                  />
-                </div>
-
-
-
-                {/* Medium Filter */}
-                <div>
-                  <label className={`text-sm font-medium text-gray-700 mb-2 block ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
-                    {t.medium}
-                  </label>
-                  <Select value={selectedMedium || 'all'} onValueChange={(value) => setSelectedMedium(value || 'all')}>
-                    <SelectTrigger className={`w-full ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
-                      <SelectValue placeholder={t.allMediums} />
-                    </SelectTrigger>
-                    <SelectContent className={language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}>
-                      <SelectItem value="all">{t.allMediums}</SelectItem>
-                      {mediums.map(medium => (
-                        <SelectItem key={medium.id} value={medium.id}>
-                          {medium.icon} {language === 'bn' ? medium.name.bn : medium.name.en}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Subject Filter - Enhanced with Categories */}
-                <div>
-                  <label className={`text-sm font-medium text-gray-700 mb-2 block ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
-                    {t.subject}
-                  </label>
-                  <Select value={selectedSubject || 'all'} onValueChange={(value) => setSelectedSubject(value || 'all')}>
-                    <SelectTrigger className={`w-full ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
-                      <SelectValue placeholder={t.allSubjects} />
-                    </SelectTrigger>
-                    <SelectContent className={`${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''} max-h-[400px]`}>
-                      <SelectItem value="all">{t.allSubjects}</SelectItem>
-                      
-                      {/* Subject Categories */}
-                      {subjectCategories.map((category) => {
-                        const categorySubjects = subjectsFromData.filter(s => s.category === category.id);
-                        if (categorySubjects.length === 0) return null;
-                        
-                        return (
-                          <div key={category.id}>
-                            <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50">
-                              {language === 'bn' ? category.name_bn : category.name_en}
-                            </div>
-                            {categorySubjects.map(subject => (
-                              <SelectItem key={subject.id} value={subject.id}>
-                                {language === 'bn' ? subject.name_bn : subject.name_en}
-                              </SelectItem>
-                            ))}
-                          </div>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Class Filter */}
-                <div>
-                  <label className={`text-sm font-medium text-gray-700 mb-2 block ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
-                    {t.class}
-                  </label>
-                  <Select value={selectedClass || 'all'} onValueChange={(value) => setSelectedClass(value || 'all')}>
-                    <SelectTrigger className={`w-full ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
-                      <SelectValue placeholder={t.allClasses} />
-                    </SelectTrigger>
-                    <SelectContent className={language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}>
-                      <SelectItem value="all">{t.allClasses}</SelectItem>
-                      {allClasses.map(cls => (
-                        <SelectItem key={cls} value={cls}>{cls}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <Separator />
-
-                {/* Hourly Rate Range */}
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-3 block">
-                    {t.hourlyRate}
-                  </label>
-                  <div className="space-y-3">
-                    <Slider
-                      min={0}
-                      max={1500}
-                      step={50}
-                      value={hourlyRateRange}
-                      onValueChange={setHourlyRateRange}
-                    />
-                    <div className="flex items-center justify-between text-sm text-gray-600">
-                      <span>৳{hourlyRateRange[0].toLocaleString()}</span>
-                      <span>৳{hourlyRateRange[1].toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Preferences */}
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-3 block">
-                    পছন্দসমূহ
-                  </label>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        id="verified"
-                        checked={verifiedOnly}
-                        onCheckedChange={(checked) => setVerifiedOnly(checked as boolean)}
-                      />
-                      <label htmlFor="verified" className="text-sm text-gray-700 cursor-pointer flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-blue-600" />
-                        {t.verified}
-                      </label>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        id="topRated"
-                        checked={topRatedOnly}
-                        onCheckedChange={(checked) => setTopRatedOnly(checked as boolean)}
-                      />
-                      <label htmlFor="topRated" className="text-sm text-gray-700 cursor-pointer flex items-center gap-2">
-                        <Award className="w-4 h-4 text-yellow-600" />
-                        {t.topRated}
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <FilterContent />
             </Card>
           </div>
 
@@ -756,9 +824,10 @@ export function FindTeachersPage({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <Card className="p-3 sm:p-4 hover:shadow-xl transition-all duration-300 border border-gray-200 h-full flex flex-col">
+                  <Card className="p-3 sm:p-4 hover:shadow-2xl transition-all duration-300 border border-white/50 bg-white/80 backdrop-blur-md h-full flex flex-col hover:border-teal-200/60 group relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-teal-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                     {/* Header Section */}
-                    <div className="flex items-start gap-2 sm:gap-3 mb-3">
+                    <div className="flex items-start gap-2 sm:gap-3 mb-3 relative z-10">
                       <div className="relative flex-shrink-0">
                         <CardAvatar 
                           src={teacher.photo}

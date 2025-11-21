@@ -14,6 +14,9 @@ import { AppDownloadSection } from '../components/AppDownloadSection';
 import { FAQSection } from '../components/FAQSection';
 import { Footer } from '../components/Footer';
 import { UnifiedAuthDialog } from '../components/UnifiedAuthDialog';
+import { AIMatchmaker } from '../components/AIMatchmaker';
+import { teachersDatabase } from '../utils/teachersData';
+import { motion } from 'motion/react';
 
 import type { User } from '../utils/authGuard';
 
@@ -68,6 +71,14 @@ export function HomePage({
     setAuthDialogOpen(true);
   };
 
+  const handleMatchFound = (matches: any[]) => {
+    // In a real app, we might want to navigate to search results with these matches
+    // For now, we'll just let the user see them in the chat window or navigate
+    console.log('Matches found:', matches);
+    // Optional: Navigate to find-teachers with pre-selected filters
+    // setPage('find-teachers');
+  };
+
   return (
     <>
       <Header 
@@ -80,7 +91,7 @@ export function HomePage({
         onLogout={onLogout}
       />
       
-      <main>
+      <main className="min-h-screen bg-gray-50">
         <HeroSection 
           language={language} 
           setPage={handleSetPage}
@@ -89,6 +100,18 @@ export function HomePage({
           currentUser={currentUser}
           onAuthRequired={handleAuthRequired}
         />
+
+        {/* AI Matchmaker Section */}
+        <section className="container mx-auto px-4 -mt-10 relative z-20">
+           <div className="max-w-4xl mx-auto">
+             <AIMatchmaker 
+               teachers={teachersDatabase} 
+               onMatchFound={handleMatchFound} 
+               language={language} 
+             />
+           </div>
+        </section>
+
         <LatestTuitionPosts language={language} setPage={handleSetPage} />
         <BenefitsSection language={language} />
         <WhyChooseUs language={language} setPage={handleSetPage} />
