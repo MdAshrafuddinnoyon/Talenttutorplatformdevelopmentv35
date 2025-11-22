@@ -4,7 +4,7 @@
   "description": "টিউশন মার্কেটপ্লেস প্ল্যাটফর্ম - Upwork-style tuition marketplace with humanitarian initiatives",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "npm install && vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
