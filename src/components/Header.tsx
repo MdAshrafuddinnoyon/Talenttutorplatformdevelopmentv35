@@ -97,7 +97,7 @@ export function Header({ language, setLanguage, setPage, announcement, onLogin, 
         {/* Background with blur effect */}
         <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/90 to-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-lg shadow-gray-200/50" />
         
-        <div className="relative container mx-auto rounded-[77654 rounded-[20px]3210px] rounded-tl-[0px] rounded-tr-[0px] rounded-bl-[50px] rounded-br-[100px]">
+        <div className="relative container mx-auto">
           <div className="flex items-center justify-between h-14 sm:h-16">
             
             {/* Premium Logo Section */}

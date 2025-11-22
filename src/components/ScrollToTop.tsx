@@ -69,7 +69,7 @@ export function ScrollToTop({
           initial={{ opacity: 0, scale: 0.5, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.5, y: 20 }}
-          className={`fixed bottom-6 md:bottom-8 ${getPositionClasses()} z-[95]`}
+          className={`fixed bottom-[6.5rem] lg:bottom-8 ${getPositionClasses()} z-[95]`}
         >
           <motion.button
             whileHover={{ scale: 1.05 }}

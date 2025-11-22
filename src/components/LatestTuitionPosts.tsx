@@ -96,10 +96,15 @@ export function LatestTuitionPosts({ language, setPage }: LatestTuitionPostsProp
   };
 
   return (
-    <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-200 rounded-full blur-3xl opacity-20"></div>
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-teal-200 rounded-full blur-3xl opacity-20"></div>
+    <section className="py-16 sm:py-20 lg:py-24 relative overflow-hidden">
+      {/* Modern Background Pattern */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMTYsIDE4NSwgMTI5LCAwLjA1KSIvPjwvc3ZnPg==')] opacity-100"></div>
+      
+      {/* Gradient Orbs */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full overflow-hidden pointer-events-none">
+         <div className="absolute top-[20%] -right-[10%] w-[500px] h-[500px] bg-emerald-400/5 rounded-full blur-[100px]"></div>
+         <div className="absolute top-[40%] -left-[10%] w-[400px] h-[400px] bg-teal-400/5 rounded-full blur-[100px]"></div>
+      </div>
       
       <div className="container mx-auto px-3 sm:px-4 relative">
         {/* Header Section */}
@@ -135,7 +140,7 @@ export function LatestTuitionPosts({ language, setPage }: LatestTuitionPostsProp
           transition={{ duration: 0.6, delay: 0.2 }}
           className="flex items-center justify-between mb-8"
         >
-          <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2">
             <Button
               variant="outline"
               size="icon"
@@ -188,16 +193,17 @@ export function LatestTuitionPosts({ language, setPage }: LatestTuitionPostsProp
               </p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {urgentPosts.slice(currentSlide * itemsPerSlide, (currentSlide + 1) * itemsPerSlide).map((post) => (
               <motion.div 
                 key={post.id}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3 }}
+                className="h-full"
               >
                 <Card 
-                  className="group p-6 hover:shadow-2xl transition-all duration-300 cursor-pointer border-2 border-gray-100 hover:border-emerald-300 hover:-translate-y-2 bg-white relative overflow-hidden h-full"
+                  className="group p-6 hover:shadow-2xl hover:shadow-emerald-100/50 transition-all duration-500 cursor-pointer border border-slate-100 hover:border-emerald-200 hover:-translate-y-1 bg-white relative overflow-hidden h-full rounded-2xl"
                   onClick={() => setPage('browse-tuitions')}
                 >
                   {/* Decorative gradient - urgent style */}

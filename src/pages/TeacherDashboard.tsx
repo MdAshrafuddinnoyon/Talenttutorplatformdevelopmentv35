@@ -47,6 +47,7 @@ import { TicketSystem } from '../components/TicketSystem';
 import { TalentTutorLogo } from '../components/TalentTutorLogo';
 import { ContractMessagingSystem } from '../components/ContractMessagingSystem';
 import { PlatformReviewDialog } from '../components/PlatformReviewDialog';
+import { AdminNoticeViewer } from '../components/AdminNoticeViewer';
 
 import { toast } from 'sonner@2.0.3';
 import { type User, type UserRole } from '../utils/authGuard';

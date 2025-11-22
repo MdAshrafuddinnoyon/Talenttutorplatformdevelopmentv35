@@ -4,8 +4,9 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Mail, Phone } from 'lucide-react';
+import { Mail, Phone, Lock, ArrowLeft, ShieldCheck, User, GraduationCap } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
+import { motion } from 'motion/react';
 
 interface LoginPageProps {
   language: 'bn' | 'en';
@@ -15,7 +16,7 @@ interface LoginPageProps {
 
 const content = {
   bn: {
-    title: 'লগইন করুন',
+    title: 'স্বাগতম',
     subtitle: 'আপনার অ্যাকাউন্টে প্রবেশ করুন',
     teacher: 'শিক্ষক',
     guardian: 'অভিভাবক',
@@ -24,7 +25,7 @@ const content = {
     emailOrPhone: 'ইমেইল অথবা মোবাইল নাম্বার',
     emailPlaceholder: 'আপনার ইমেইল অথবা ০১৭xxxxxxxx',
     password: 'পাসওয়ার্ড',
-    login: 'লগইন',
+    login: 'লগইন করুন',
     noAccount: 'অ্যাকাউন্ট নেই?',
     register: 'নিবন্ধন করুন',
     backToHome: 'হোমে ফিরুন',
@@ -33,7 +34,7 @@ const content = {
     loginWith: 'দিয়ে লগইন করুন',
   },
   en: {
-    title: 'Login',
+    title: 'Welcome Back',
     subtitle: 'Access your account',
     teacher: 'Teacher',
     guardian: 'Guardian',
@@ -56,6 +57,7 @@ export function LoginPage({ language, onLogin, setPage }: LoginPageProps) {
   const t = content[language];
   const [activeTab, setActiveTab] = useState<'teacher' | 'guardian' | 'student' | 'admin'>('teacher');
   const [emailOrPhone, setEmailOrPhone] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Validate if input is a valid Bangladeshi phone number
   const isValidBDPhone = (phone: string): boolean => {
@@ -70,15 +72,20 @@ export function LoginPage({ language, onLogin, setPage }: LoginPageProps) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleSubmit = (e: React.FormEvent, tabType: 'teacher' | 'guardian' | 'student' | 'admin') => {
+  const handleSubmit = async (e: React.FormEvent, tabType: 'teacher' | 'guardian' | 'student' | 'admin') => {
     e.preventDefault();
+    setIsLoading(true);
     
     const formData = new FormData(e.target as HTMLFormElement);
     const identifier = formData.get('emailOrPhone') as string;
     
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+
     // Validate input
     if (!isValidEmail(identifier) && !isValidBDPhone(identifier)) {
       toast.error(t.invalidPhone);
+      setIsLoading(false);
       return;
     }
     
@@ -87,169 +94,133 @@ export function LoginPage({ language, onLogin, setPage }: LoginPageProps) {
     console.log(`Login with ${loginType}:`, identifier);
     
     onLogin(tabType);
+    setIsLoading(false);
+  };
+
+  const getTabIcon = (type: string) => {
+    switch (type) {
+      case 'teacher': return <GraduationCap className="w-4 h-4 mr-2" />;
+      case 'guardian': return <ShieldCheck className="w-4 h-4 mr-2" />;
+      case 'student': return <User className="w-4 h-4 mr-2" />;
+      default: return <ShieldCheck className="w-4 h-4 mr-2" />;
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-8">
-        <div className="text-center mb-6">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-xl">TT</span>
-            </div>
+    <div className="min-h-screen flex items-center justify-center p-4 relative z-10">
+      {/* Back Button */}
+      <button 
+        onClick={() => setPage('home')}
+        className="absolute top-6 left-6 p-2 rounded-full bg-white/50 hover:bg-white/80 backdrop-blur-sm transition-all hover:shadow-md group"
+      >
+        <ArrowLeft className="w-6 h-6 text-slate-600 group-hover:text-emerald-600" />
+      </button>
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
+      >
+        <Card className="w-full p-6 sm:p-8 bg-white/70 backdrop-blur-2xl border-white/50 shadow-2xl shadow-emerald-100/20 rounded-[2rem]">
+          <div className="text-center mb-8">
+            <motion.div 
+              whileHover={{ rotate: 360 }}
+              transition={{ duration: 0.8 }}
+              className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30"
+            >
+              <span className="text-white text-2xl font-bold font-serif">TT</span>
+            </motion.div>
+            <h1 className={`text-2xl sm:text-3xl font-bold text-slate-900 mb-2 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+              {t.title}
+            </h1>
+            <p className={`text-slate-600 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+              {t.subtitle}
+            </p>
           </div>
-          <h1 className="text-gray-900 mb-2">{t.title}</h1>
-          <p className="text-gray-600">{t.subtitle}</p>
-        </div>
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="mb-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="teacher">{t.teacher}</TabsTrigger>
-            <TabsTrigger value="guardian">{t.guardian}</TabsTrigger>
-            <TabsTrigger value="student">{t.student}</TabsTrigger>
-            <TabsTrigger value="admin">{t.admin}</TabsTrigger>
-          </TabsList>
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="mb-8">
+            <TabsList className="grid w-full grid-cols-4 p-1 bg-slate-100/50 rounded-xl h-12">
+              <TabsTrigger value="teacher" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs sm:text-sm">{t.teacher}</TabsTrigger>
+              <TabsTrigger value="guardian" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs sm:text-sm">{t.guardian}</TabsTrigger>
+              <TabsTrigger value="student" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs sm:text-sm">{t.student}</TabsTrigger>
+              <TabsTrigger value="admin" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs sm:text-sm">{t.admin}</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="teacher">
-            <form onSubmit={(e) => handleSubmit(e, 'teacher')} className="space-y-4">
-              <div>
-                <Label htmlFor="teacher-emailOrPhone">{t.emailOrPhone}</Label>
-                <div className="relative">
-                  <Input 
-                    id="teacher-emailOrPhone" 
-                    name="emailOrPhone"
-                    type="text" 
-                    required 
-                    placeholder={t.emailPlaceholder}
-                    className="pl-10"
-                  />
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <Mail className="w-4 h-4" />
+            {['teacher', 'guardian', 'student', 'admin'].map((tab) => (
+              <TabsContent key={tab} value={tab} className="mt-6">
+                <form onSubmit={(e) => handleSubmit(e, tab as any)} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor={`${tab}-emailOrPhone`} className={`text-slate-700 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      {t.emailOrPhone}
+                    </Label>
+                    <div className="relative group">
+                      <Input 
+                        id={`${tab}-emailOrPhone`} 
+                        name="emailOrPhone"
+                        type="text" 
+                        required 
+                        placeholder={t.emailPlaceholder}
+                        className="pl-11 h-12 bg-white/50 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl transition-all"
+                      />
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors">
+                        <Mail className="w-5 h-5" />
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  ইমেইল: teacher@example.com অথবা মোবাইল: 01712345678
-                </p>
-              </div>
-              <div>
-                <Label htmlFor="teacher-password">{t.password}</Label>
-                <Input id="teacher-password" type="password" required placeholder="••••••••" />
-              </div>
-              <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
-                {t.login}
-              </Button>
-            </form>
-          </TabsContent>
 
-          <TabsContent value="guardian">
-            <form onSubmit={(e) => handleSubmit(e, 'guardian')} className="space-y-4">
-              <div>
-                <Label htmlFor="guardian-emailOrPhone">{t.emailOrPhone}</Label>
-                <div className="relative">
-                  <Input 
-                    id="guardian-emailOrPhone" 
-                    name="emailOrPhone"
-                    type="text" 
-                    required 
-                    placeholder={t.emailPlaceholder}
-                    className="pl-10"
-                  />
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <Mail className="w-4 h-4" />
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor={`${tab}-password`} className={`text-slate-700 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                        {t.password}
+                      </Label>
+                      <a href="#" className={`text-xs text-emerald-600 hover:text-emerald-700 hover:underline ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                        {t.forgotPassword}
+                      </a>
+                    </div>
+                    <div className="relative group">
+                      <Input 
+                        id={`${tab}-password`} 
+                        type="password" 
+                        required 
+                        placeholder="••••••••"
+                        className="pl-11 h-12 bg-white/50 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl transition-all" 
+                      />
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors">
+                        <Lock className="w-5 h-5" />
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  ইমেইল: guardian@example.com অথবা ম���বাইল: 01812345678
-                </p>
-              </div>
-              <div>
-                <Label htmlFor="guardian-password">{t.password}</Label>
-                <Input id="guardian-password" type="password" required placeholder="••••••••" />
-              </div>
-              <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
-                {t.login}
-              </Button>
-            </form>
-          </TabsContent>
 
-          <TabsContent value="student">
-            <form onSubmit={(e) => handleSubmit(e, 'student')} className="space-y-4">
-              <div>
-                <Label htmlFor="student-emailOrPhone">{t.emailOrPhone}</Label>
-                <div className="relative">
-                  <Input 
-                    id="student-emailOrPhone" 
-                    name="emailOrPhone"
-                    type="text" 
-                    required 
-                    placeholder={t.emailPlaceholder}
-                    className="pl-10"
-                  />
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <Mail className="w-4 h-4" />
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  ইমেইল: student@example.com অথবা মোবাইল: 01912345678
-                </p>
-              </div>
-              <div>
-                <Label htmlFor="student-password">{t.password}</Label>
-                <Input id="student-password" type="password" required placeholder="••••••••" />
-              </div>
-              <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
-                {t.login}
-              </Button>
-            </form>
-          </TabsContent>
+                  <Button 
+                    type="submit" 
+                    className={`w-full h-12 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-medium shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-0.5 transition-all duration-300 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      t.login
+                    )}
+                  </Button>
+                </form>
+              </TabsContent>
+            ))}
+          </Tabs>
 
-          <TabsContent value="admin">
-            <form onSubmit={(e) => handleSubmit(e, 'admin')} className="space-y-4">
-              <div>
-                <Label htmlFor="admin-emailOrPhone">{t.emailOrPhone}</Label>
-                <div className="relative">
-                  <Input 
-                    id="admin-emailOrPhone" 
-                    name="emailOrPhone"
-                    type="text" 
-                    required 
-                    placeholder={t.emailPlaceholder}
-                    className="pl-10"
-                  />
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <Mail className="w-4 h-4" />
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  ইমেইল: admin@example.com অথবা মোবাইল: 01612345678
-                </p>
-              </div>
-              <div>
-                <Label htmlFor="admin-password">{t.password}</Label>
-                <Input id="admin-password" type="password" required placeholder="••••••••" />
-              </div>
-              <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
-                {t.login}
-              </Button>
-            </form>
-          </TabsContent>
-        </Tabs>
-
-        <div className="text-center space-y-3">
-          <a href="#" className="text-emerald-600 hover:underline text-sm">
-            {t.forgotPassword}
-          </a>
-          <div className="text-gray-600 text-sm">
-            {t.noAccount}{' '}
-            <button onClick={() => setPage('register')} className="text-emerald-600 hover:underline">
-              {t.register}
-            </button>
+          <div className="text-center">
+            <p className={`text-slate-500 text-sm ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+              {t.noAccount}{' '}
+              <button 
+                onClick={() => setPage('register')} 
+                className="text-emerald-600 font-semibold hover:text-emerald-700 hover:underline transition-colors"
+              >
+                {t.register}
+              </button>
+            </p>
           </div>
-          <button onClick={() => setPage('home')} className="text-gray-600 hover:text-emerald-600 text-sm">
-            {t.backToHome}
-          </button>
-        </div>
-      </Card>
+        </Card>
+      </motion.div>
     </div>
   );
 }

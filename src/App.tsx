@@ -55,6 +55,7 @@ import { SupportChat } from "./components/SupportChat";
 import { VisitorSupportChat } from "./components/VisitorSupportChat";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { DynamicChatWidget } from "./components/DynamicChatWidget";
+import { MobileNav } from "./components/MobileNav";
 import { ForGuardiansPage } from "./pages/ForGuardiansPage";
 import { ForTeachersPage } from "./pages/ForTeachersPage";
 import { BlogManagementPage } from "./pages/BlogManagementPage";
@@ -1307,11 +1308,39 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen bg-white ${language === 'bn' ? 'font-noto-serif-bengali' : 'font-libre'}`}>
+    <div className={`min-h-screen relative selection:bg-emerald-100 selection:text-emerald-900 ${language === 'bn' ? 'font-noto-serif-bengali' : 'font-libre'}`}>
+      {/* Global Background - As requested, applying the Hero background to the whole site */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-50 bg-[#F8FAFC]">
+        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-emerald-400/10 rounded-full blur-[100px] animate-pulse mix-blend-multiply"></div>
+        <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-teal-400/10 rounded-full blur-[120px] animate-pulse mix-blend-multiply" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-[40%] left-[40%] w-[400px] h-[400px] bg-cyan-400/10 rounded-full blur-[90px] animate-pulse mix-blend-multiply" style={{ animationDelay: '4s' }}></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA0MCAwIEwgMCAwIDAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgxNSwgMTE4LCAxMTAsIDAuMDMpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-100"></div>
+      </div>
+
       {/* Silent demo users initialization - runs in background */}
       <DemoUsersAutoInit />
       
-      {renderPage()}
+      <div className="pb-20 lg:pb-0">
+        {renderPage()}
+      </div>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileNav 
+        language={language}
+        setPage={setCurrentPage}
+        activePage={currentPage}
+        isAuthenticated={isAuthenticated}
+        userRole={userType}
+        onMenuClick={() => {
+          // Simple toggle for now, or navigate to a menu page
+          // Since Header handles the menu state locally, we might want to just scroll to top 
+          // where the header is, or maybe trigger a global state later.
+          // For now, let's navigate to 'settings' as a placeholder for "Menu" functionality
+          // or open the sidebar if we had a global one. 
+          // Given the constraints, let's scroll to top which reveals the header menu
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
 
       {/* Dynamic Chat Widget - Changes based on authentication (Hidden for Admin) */}
       {userType !== "admin" && (

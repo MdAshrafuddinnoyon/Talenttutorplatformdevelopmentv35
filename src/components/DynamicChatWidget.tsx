@@ -95,7 +95,7 @@ export function DynamicChatWidget({
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       const welcomeMsg = isVisitor
-        ? 'নমস্কার! 👋 আমি কিভাবে আপনাকে সাহায্য করতে পারি?'
+        ? 'আসসালামু আলাইকুম! 👋 আমি কিভাবে আপনাকে সাহায্য করতে পারি?'
         : `হ্যালো ${userName || ''}! 👋 প্রশ্ন করুন।`;
       
       setMessages([{
@@ -106,6 +106,13 @@ export function DynamicChatWidget({
       }]);
     }
   }, [isOpen]);
+
+  // Listen for global event to open chat
+  useEffect(() => {
+    const handleOpenChat = () => setIsOpen(true);
+    window.addEventListener('open-support-chat', handleOpenChat);
+    return () => window.removeEventListener('open-support-chat', handleOpenChat);
+  }, []);
 
   const getVisitorAutoResponse = (message: string): string => {
     const lowerMsg = message.toLowerCase();
@@ -200,7 +207,7 @@ export function DynamicChatWidget({
     <>
       {/* Floating Chat Button */}
       <motion.div
-        className={`fixed bottom-4 z-[100] ${isVisitor ? 'left-4' : 'right-4'}`}
+        className={`fixed bottom-[5.5rem] lg:bottom-4 z-[100] ${isVisitor ? 'left-4' : 'right-4'}`}
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.5 }}
@@ -274,7 +281,7 @@ export function DynamicChatWidget({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className={`fixed bottom-20 z-[99] ${isVisitor ? 'left-4' : 'right-4'} ${
+            className={`fixed bottom-28 lg:bottom-20 z-[99] ${isVisitor ? 'left-4' : 'right-4'} ${
               isMinimized ? 'w-64' : 'w-72 md:w-80'
             } max-w-[calc(100vw-2rem)]`}
           >

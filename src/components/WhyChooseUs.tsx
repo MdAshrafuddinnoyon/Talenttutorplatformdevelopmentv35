@@ -82,143 +82,136 @@ export function WhyChooseUs({ language, setPage }: WhyChooseUsProps) {
   const t = content[language];
 
   return (
-    <section className="py-10 sm:py-14 lg:py-20 bg-gradient-to-br from-gray-50 via-white to-emerald-50 relative overflow-hidden">
+    <section className="py-16 sm:py-20 lg:py-24 relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-1/4 left-10 w-96 h-96 bg-gradient-to-br from-emerald-400 to-teal-400 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full blur-3xl" />
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmMmY0ZjYiIGZpbGwtb3BhY2l0eT0iMC40Ij48cGF0aCBkPSJNMzYgMzR2LTRoLTJ2NGgtNHYyaDR2NGgydi00aDR2LTJoLTR6bTAtMzBWNHgtMnY0aC00djJoNHY0aDJVMTBoNHVLTJoLTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-40"></div>
       </div>
 
-      <div className="container mx-auto px-3 sm:px-4 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Section Header */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-8 sm:mb-12"
+          className="text-center mb-12 sm:mb-16"
         >
-          <Badge className={`mb-6 px-6 py-2 bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-700 border-emerald-200 shadow-md ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
-            <Sparkles className="w-4 h-4 mr-2" />
+          <Badge className={`mb-6 px-4 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-sm ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+            <Sparkles className="w-3.5 h-3.5 mr-2 fill-emerald-500 text-emerald-500" />
             {t.badge}
           </Badge>
-          <h2 className={`text-4xl md:text-5xl lg:text-6xl text-gray-900 mb-6 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+          <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-6 tracking-tight ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
             {t.title}
           </h2>
-          <p className={`text-xl text-gray-600 max-w-3xl mx-auto ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+          <p className={`text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
             {t.subtitle}
           </p>
         </motion.div>
 
         {/* Features Grid */}
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Feature 1 */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <Card className="group p-8 bg-gradient-to-br from-emerald-600 to-teal-600 text-white border-0 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 h-full">
-              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <span className="text-3xl">👨‍🏫</span>
-              </div>
-              <h3 className={`text-2xl text-white mb-6 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{t.feature1Title}</h3>
-              <ul className="space-y-3 mb-8">
-                {t.feature1Points.map((point, index) => (
-                  <motion.li 
-                    key={point}
-                    initial={{ opacity: 0, x: -10 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                    className="flex items-start gap-3"
-                  >
-                    <CheckCircle className="w-5 h-5 text-emerald-200 flex-shrink-0 mt-0.5" />
-                    <span className={`text-emerald-50 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{point}</span>
-                  </motion.li>
-                ))}
-              </ul>
-              <Button 
-                className={`w-full bg-white text-emerald-700 hover:bg-emerald-50 hover:shadow-lg transition-all ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
-                onClick={() => setPage && setPage('login')}
-              >
-                {t.learnMore}
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Card>
-          </motion.div>
-
-          {/* Feature 2 */}
+          {/* Feature 1 - Teachers (Emerald) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.5 }}
           >
-            <Card className="group p-8 bg-gradient-to-br from-emerald-600 to-teal-600 text-white border-0 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 h-full">
-              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <span className="text-3xl">👨‍👩‍👧‍👦</span>
+            <Card className="group p-8 bg-gradient-to-br from-emerald-600 to-teal-600 text-white border-0 hover:shadow-2xl hover:shadow-emerald-200/50 transition-all duration-300 hover:-translate-y-2 h-full rounded-3xl overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 transition-transform group-hover:scale-150 duration-700"></div>
+              
+              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform shadow-inner border border-white/20">
+                <span className="text-2xl">👨‍🏫</span>
               </div>
-              <h3 className={`text-2xl text-white mb-6 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{t.feature2Title}</h3>
-              <ul className="space-y-3 mb-8">
-                {t.feature2Points.map((point, index) => (
+              <h3 className={`text-2xl font-bold text-white mb-6 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{t.feature1Title}</h3>
+              <ul className="space-y-4 mb-8">
+                {t.feature1Points.map((point, index) => (
                   <motion.li 
                     key={point}
-                    initial={{ opacity: 0, x: -10 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
                     className="flex items-start gap-3"
                   >
                     <CheckCircle className="w-5 h-5 text-emerald-200 flex-shrink-0 mt-0.5" />
-                    <span className={`text-emerald-50 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{point}</span>
+                    <span className={`text-emerald-50 font-medium ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{point}</span>
                   </motion.li>
                 ))}
               </ul>
               <Button 
-                className="w-full bg-white text-purple-700 hover:bg-purple-50 hover:shadow-lg transition-all"
+                className={`w-full bg-white text-emerald-700 hover:bg-emerald-50 hover:shadow-lg transition-all rounded-xl h-12 font-semibold mt-auto ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
                 onClick={() => setPage && setPage('login')}
               >
                 {t.learnMore}
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Card>
           </motion.div>
 
-          {/* Feature 3 */}
+          {/* Feature 2 - Parents (Violet/Indigo) */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <Card className="group p-8 bg-gradient-to-br from-red-500 to-orange-600 text-white border-0 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 h-full">
-              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <span className="text-3xl">❤️</span>
+            <Card className="group p-8 bg-gradient-to-br from-violet-600 to-indigo-600 text-white border-0 hover:shadow-2xl hover:shadow-indigo-200/50 transition-all duration-300 hover:-translate-y-2 h-full rounded-3xl overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 transition-transform group-hover:scale-150 duration-700"></div>
+
+              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform shadow-inner border border-white/20">
+                <span className="text-2xl">👨‍👩‍👧‍👦</span>
               </div>
-              <h3 className={`text-2xl text-white mb-6 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{t.feature3Title}</h3>
-              <ul className="space-y-3 mb-8">
-                {t.feature3Points.map((point, index) => (
+              <h3 className={`text-2xl font-bold text-white mb-6 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{t.feature2Title}</h3>
+              <ul className="space-y-4 mb-8">
+                {t.feature2Points.map((point, index) => (
                   <motion.li 
                     key={point}
-                    initial={{ opacity: 0, x: -10 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
                     className="flex items-start gap-3"
                   >
-                    <CheckCircle className="w-5 h-5 text-red-200 flex-shrink-0 mt-0.5" />
-                    <span className={`text-red-50 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{point}</span>
+                    <CheckCircle className="w-5 h-5 text-violet-200 flex-shrink-0 mt-0.5" />
+                    <span className={`text-violet-50 font-medium ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{point}</span>
                   </motion.li>
                 ))}
               </ul>
               <Button 
-                className="w-full bg-white text-red-700 hover:bg-red-50 hover:shadow-lg transition-all"
+                className={`w-full bg-white text-violet-700 hover:bg-violet-50 hover:shadow-lg transition-all rounded-xl h-12 font-semibold mt-auto ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+                onClick={() => setPage && setPage('login')}
+              >
+                {t.learnMore}
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Card>
+          </motion.div>
+
+          {/* Feature 3 - Social (Rose/Orange) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Card className="group p-8 bg-gradient-to-br from-rose-500 to-orange-600 text-white border-0 hover:shadow-2xl hover:shadow-orange-200/50 transition-all duration-300 hover:-translate-y-2 h-full rounded-3xl overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 transition-transform group-hover:scale-150 duration-700"></div>
+
+              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform shadow-inner border border-white/20">
+                <span className="text-2xl">❤️</span>
+              </div>
+              <h3 className={`text-2xl font-bold text-white mb-6 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{t.feature3Title}</h3>
+              <ul className="space-y-4 mb-8">
+                {t.feature3Points.map((point, index) => (
+                  <motion.li 
+                    key={point}
+                    className="flex items-start gap-3"
+                  >
+                    <CheckCircle className="w-5 h-5 text-rose-200 flex-shrink-0 mt-0.5" />
+                    <span className={`text-rose-50 font-medium ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{point}</span>
+                  </motion.li>
+                ))}
+              </ul>
+              <Button 
+                className={`w-full bg-white text-rose-600 hover:bg-rose-50 hover:shadow-lg transition-all rounded-xl h-12 font-semibold mt-auto ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
                 onClick={() => setPage && setPage('donation')}
               >
                 {t.learnMore}
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Card>
           </motion.div>

@@ -549,7 +549,7 @@ export function FindTeachersPage({
           {t.medium}
         </label>
         <Select value={selectedMedium || 'all'} onValueChange={(value) => setSelectedMedium(value || 'all')}>
-          <SelectTrigger className={`w-full ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+          <SelectTrigger className={`w-full bg-white/50 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
             <SelectValue placeholder={t.allMediums} />
           </SelectTrigger>
           <SelectContent className={language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}>
@@ -569,7 +569,7 @@ export function FindTeachersPage({
           {t.subject}
         </label>
         <Select value={selectedSubject || 'all'} onValueChange={(value) => setSelectedSubject(value || 'all')}>
-          <SelectTrigger className={`w-full ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+          <SelectTrigger className={`w-full bg-white/50 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
             <SelectValue placeholder={t.allSubjects} />
           </SelectTrigger>
           <SelectContent className={`${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''} max-h-[400px]`}>
@@ -603,7 +603,7 @@ export function FindTeachersPage({
           {t.class}
         </label>
         <Select value={selectedClass || 'all'} onValueChange={(value) => setSelectedClass(value || 'all')}>
-          <SelectTrigger className={`w-full ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+          <SelectTrigger className={`w-full bg-white/50 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
             <SelectValue placeholder={t.allClasses} />
           </SelectTrigger>
           <SelectContent className={language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}>
@@ -629,6 +629,7 @@ export function FindTeachersPage({
             step={50}
             value={hourlyRateRange}
             onValueChange={setHourlyRateRange}
+            className="py-2"
           />
           <div className="flex items-center justify-between text-sm text-gray-600">
             <span>৳{hourlyRateRange[0].toLocaleString()}</span>
@@ -678,7 +679,7 @@ export function FindTeachersPage({
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-teal-50">
+    <div className="min-h-screen">
       <Header
         language={language}
         setLanguage={setLanguage}
@@ -689,59 +690,106 @@ export function FindTeachersPage({
         onLogout={onLogout}
       />
 
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-teal-600 via-emerald-600 to-cyan-600 text-white py-6 sm:py-8 lg:py-10">
-        <div className="container mx-auto px-3 sm:px-4">
+      {/* Hero Section with Glass Effect */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white py-12 sm:py-16">
+        {/* Background Decorations */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-20 -right-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-teal-400/20 rounded-full blur-3xl"></div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsIDI1NSwgMjU1LCAwLjA1KSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20"></div>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setPage('home')}
-              className={`text-white hover:bg-white/20 mb-3 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+              className={`text-white hover:bg-white/20 mb-4 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              {t.backToHome}
+              {language === 'bn' ? 'হোমে ফিরুন' : 'Back to Home'}
             </Button>
-            
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <h1 className={`text-white mb-2 text-2xl sm:text-3xl ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{t.title}</h1>
-              <p className={`text-base sm:text-lg text-teal-100 mb-4 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{t.subtitle}</p>
+              <h1 className={`text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                {t.title}
+              </h1>
+              <p className={`text-lg md:text-xl text-teal-50 mb-8 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                {t.subtitle}
+              </p>
 
-              {/* Stats */}
-              <div className="flex flex-wrap gap-2 sm:gap-3 mb-4">
-                <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-[Noto_Serif_Bengali]">
-                  <TrendingUp className="w-4 h-4" />
-                  <span>{teachersDatabase.length}+ যোগ্য শিক্ষক</span>
+              {/* Stats Cards - Matching BrowseTuitionsPage Style */}
+              <div className="flex flex-wrap gap-4 mb-8">
+                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 px-5 py-3 rounded-xl shadow-lg hover:bg-white/20 transition-colors">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <TrendingUp className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold">{teachersDatabase.length}+</div>
+                    <div className={`text-xs text-teal-100 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{language === 'bn' ? 'যোগ্য শিক্ষক' : 'Qualified Teachers'}</div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-[Noto_Serif_Bengali]">
-                  <CheckCircle className="w-4 h-4" />
-                  <span>{teachersDatabase.filter(t => t.verified).length}+ যাচাইকৃত</span>
+                
+                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 px-5 py-3 rounded-xl shadow-lg hover:bg-white/20 transition-colors">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <Verified className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold">{teachersDatabase.filter(t => t.verified).length}+</div>
+                    <div className={`text-xs text-teal-100 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{language === 'bn' ? 'যাচাইকৃত' : 'Verified'}</div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-[Noto_Serif_Bengali]">
-                  <Award className="w-4 h-4" />
-                  <span>৯৫% সাফল্যের হার</span>
+
+                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 px-5 py-3 rounded-xl shadow-lg hover:bg-white/20 transition-colors">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <Award className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold">{language === 'bn' ? '৯৫%' : '95%'}</div>
+                    <div className={`text-xs text-teal-100 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{language === 'bn' ? 'সাফল্যের হার' : 'Success Rate'}</div>
+                  </div>
                 </div>
               </div>
 
-              {/* Search and Sort */}
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              {/* Search Bar - Matching BrowseTuitionsPage Style */}
+              <div className="flex flex-col sm:flex-row gap-3 max-w-2xl bg-white/95 backdrop-blur-xl p-2 rounded-xl shadow-2xl">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <Input
                     type="text"
                     placeholder={t.search}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 h-10 bg-white/95 backdrop-blur-sm border-0 shadow-lg text-gray-900 placeholder:text-gray-500 text-sm"
+                    className={`pl-10 h-12 bg-transparent border-0 focus-visible:ring-0 text-base text-gray-900 placeholder:text-gray-500 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
                   />
                 </div>
                 <div className="flex gap-2">
+                  <Sheet open={isMobileFiltersOpen} onOpenChange={setIsMobileFiltersOpen}>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" className="lg:hidden h-12 px-4 border-slate-200 rounded-lg hover:bg-slate-50">
+                        <Filter className="w-5 h-5 text-slate-600" />
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
+                      <SheetHeader>
+                        <SheetTitle>{t.filters}</SheetTitle>
+                      </SheetHeader>
+                      <div className="py-4">
+                        <FilterContent />
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+                  
                   <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-full sm:w-44 h-10 bg-white/95 backdrop-blur-sm border-0 shadow-lg text-gray-900 text-sm">
-                      <SelectValue />
+                    <SelectTrigger className={`w-[140px] sm:w-[180px] h-12 border-0 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                      <div className="flex items-center gap-2 truncate">
+                        <SlidersHorizontal className="w-4 h-4" />
+                        <SelectValue placeholder={t.sortBy} />
+                      </div>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="recommended">{t.recommended}</SelectItem>
@@ -751,26 +799,6 @@ export function FindTeachersPage({
                       <SelectItem value="highestRate">{t.highestRate}</SelectItem>
                     </SelectContent>
                   </Select>
-                  
-                  {/* Mobile Filter Toggle */}
-                  <Sheet open={isMobileFiltersOpen} onOpenChange={setIsMobileFiltersOpen}>
-                    <SheetTrigger asChild>
-                      <Button 
-                        variant="secondary" 
-                        className="lg:hidden h-10 bg-white/95 backdrop-blur-sm border-0 shadow-lg text-gray-900"
-                      >
-                        <SlidersHorizontal className="w-4 h-4" />
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
-                      <SheetHeader>
-                        <SheetTitle className={language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}>{t.filters}</SheetTitle>
-                      </SheetHeader>
-                      <div className="mt-6">
-                        <FilterContent />
-                      </div>
-                    </SheetContent>
-                  </Sheet>
                 </div>
               </div>
             </motion.div>
@@ -778,221 +806,197 @@ export function FindTeachersPage({
         </div>
       </div>
 
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        <AIMatchmaker 
-          teachers={originalTeachers} 
-          onMatchFound={handleAIMatchFound} 
-          language={language} 
-        />
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-5" id="teacher-results">
-          {/* Filters Sidebar - Desktop */}
-          <div className="hidden lg:block lg:col-span-1">
-            <Card className="p-4 sm:p-5 sticky top-24">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className={`text-gray-900 flex items-center gap-2 text-base ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
-                  <Filter className="w-4 h-4" />
-                  {t.filters}
-                </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClearFilters}
-                  className={`text-teal-600 hover:text-teal-700 text-xs px-2 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
-                >
-                  {t.clearFilters}
-                </Button>
-              </div>
-              <FilterContent />
-            </Card>
+      <div className="container mx-auto px-4 pb-20">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar Filters - Desktop */}
+          <div className="hidden lg:block w-72 shrink-0">
+            <div className="sticky top-24">
+              <Card className="p-6 bg-white/60 backdrop-blur-xl border-white/60 shadow-lg shadow-emerald-100/10 rounded-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className={`font-semibold text-lg ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                    {t.filters}
+                  </h3>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={handleClearFilters}
+                    className="text-emerald-600 h-8 px-2 hover:bg-emerald-50"
+                  >
+                    {t.clearFilters}
+                  </Button>
+                </div>
+                <FilterContent />
+              </Card>
+            </div>
           </div>
 
-          {/* Teachers List */}
-          <div className="lg:col-span-3">
-            {/* Results Count */}
-            <div className="mb-6">
-              <div className={`text-gray-700 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
-                <span className="font-bold text-2xl text-teal-600">{sortedTeachers.length}</span> {t.teachersFound}
-              </div>
+          {/* Teacher Grid */}
+          <div className="flex-1">
+            {/* AI Matchmaker */}
+            <AIMatchmaker 
+              teachers={teachers} 
+              onMatchFound={handleAIMatchFound} 
+              language={language} 
+            />
+
+            <div className="flex items-center justify-between mb-6 mt-8">
+              <h2 className={`text-xl font-bold text-slate-900 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                {sortedTeachers.length} {t.teachersFound}
+              </h2>
             </div>
 
-            {/* Teachers Cards - Upwork Style */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
-              {sortedTeachers.slice(0, displayCount).map((teacher, index) => (
-                <motion.div
-                  key={teacher.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <Card className="p-3 sm:p-4 hover:shadow-2xl transition-all duration-300 border border-white/50 bg-white/80 backdrop-blur-md h-full flex flex-col hover:border-teal-200/60 group relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-teal-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                    {/* Header Section */}
-                    <div className="flex items-start gap-2 sm:gap-3 mb-3 relative z-10">
-                      <div className="relative flex-shrink-0">
-                        <CardAvatar 
-                          src={teacher.photo}
-                          alt={teacher.name}
-                          fallback={teacher.name.charAt(0)}
-                          className="border-2 border-gray-100"
-                          size="sm"
-                        />
-                        {teacher.verified && (
-                          <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 text-white rounded-full p-0.5">
-                            <Verified className="w-2.5 h-2.5 fill-current" />
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <AnimatePresence mode="popLayout">
+                {sortedTeachers.slice(0, displayCount).map((teacher, index) => (
+                  <motion.div
+                    key={teacher.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                  >
+                    <Card className="group h-full flex flex-col bg-white/70 backdrop-blur-md border-white/60 shadow-lg hover:shadow-xl hover:shadow-emerald-100/40 transition-all duration-300 hover:-translate-y-1 rounded-2xl overflow-hidden">
+                      <div className="p-5 flex-1">
+                        {/* Header */}
+                        <div className="flex items-start gap-4 mb-4">
+                          <div className="relative shrink-0">
+                            <CardAvatar 
+                              src={teacher.photo} 
+                              alt={teacher.name}
+                              fallback={teacher.name.charAt(0)}
+                              className="w-16 h-16 ring-4 ring-white shadow-md"
+                              verified={teacher.verified}
+                            />
+                            <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[10px] font-medium border ${getAvailabilityColor(teacher.availability || 'offline')}`}>
+                              {getAvailabilityText(teacher.availability || 'offline')}
+                            </div>
                           </div>
-                        )}
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <h3 className={`text-gray-900 truncate mb-0.5 text-sm ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{teacher.name}</h3>
-                        <p className={`text-xs text-gray-600 mb-1 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>{teacher.location}</p>
-                        
-                        {/* Rate & Rating Row */}
-                        <div className={`flex items-center gap-2 text-xs ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
-                          <span className="font-semibold text-gray-900">
-                            ৳{teacher.hourlyRate.min}/hr
-                          </span>
-                          <div className="flex items-center gap-0.5">
-                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                            <span className="font-semibold text-gray-900">{teacher.rating}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <h3 className={`font-bold text-lg text-slate-900 truncate ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                                {teacher.name}
+                              </h3>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className={`h-8 w-8 rounded-full ${savedTeachers.includes(teacher.id) ? 'text-rose-500 bg-rose-50' : 'text-slate-400 hover:text-rose-500 hover:bg-rose-50'}`}
+                                onClick={() => handleSaveTeacher(teacher.id)}
+                              >
+                                <Heart className={`w-5 h-5 ${savedTeachers.includes(teacher.id) ? 'fill-current' : ''}`} />
+                              </Button>
+                            </div>
+                            <p className={`text-sm text-slate-500 mb-1 truncate ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
+                              {teacher.title}
+                            </p>
+                            <div className="flex items-center gap-2 text-sm text-amber-500 font-medium">
+                              <Star className="w-4 h-4 fill-current" />
+                              {teacher.rating} <span className="text-slate-400 font-normal">({teacher.totalReviews})</span>
+                              {teacher.topRated && (
+                                <Badge variant="secondary" className="h-5 bg-amber-100 text-amber-700 border-amber-200 text-[10px] px-1.5">
+                                  Top Rated
+                                </Badge>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex items-center gap-0.5 text-gray-600">
-                            <CheckCircle className="w-3 h-3" />
-                            <span>{teacher.completedJobs} jobs</span>
+                        </div>
+
+                        {/* Details */}
+                        <div className="space-y-3 mb-4">
+                          <div className="flex items-center gap-2 text-sm text-slate-600">
+                            <MapPin className="w-4 h-4 text-emerald-500" />
+                            <span className="truncate">{teacher.location}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-slate-600">
+                            <DollarSign className="w-4 h-4 text-emerald-500" />
+                            <span>৳{teacher.hourlyRate.min} - ৳{teacher.hourlyRate.max} {t.perHour}</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {teacher.subjects.slice(0, 3).map((subject, i) => (
+                              <Badge key={i} variant="outline" className="bg-white/50 border-slate-200 text-slate-600 font-normal">
+                                {subject}
+                              </Badge>
+                            ))}
+                            {teacher.subjects.length > 3 && (
+                              <Badge variant="outline" className="bg-white/50 border-slate-200 text-slate-500 font-normal">
+                                +{teacher.subjects.length - 3}
+                              </Badge>
+                            )}
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Bio/Description */}
-                    <p className={`text-xs text-gray-700 mb-2 sm:mb-3 line-clamp-2 flex-grow ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
-                      {teacher.bio}
-                    </p>
-
-                    {/* Skills Tags */}
-                    <div className="flex flex-wrap gap-1 mb-2 sm:mb-3">
-                      {teacher.skills.slice(0, 3).map((skill) => (
-                        <Badge 
-                          key={skill} 
-                          variant="secondary" 
-                          className={`text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-700 hover:bg-gray-200 border-0 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
-                        >
-                          {skill}
-                        </Badge>
-                      ))}
-                      {teacher.skills.length > 3 && (
-                        <button 
-                          className={`text-[10px] text-gray-600 hover:text-gray-900 flex items-center ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}
+                      {/* Actions */}
+                      <div className="p-4 border-t border-slate-100 bg-white/30 flex items-center gap-2">
+                        <Button 
+                          className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20"
                           onClick={() => handleViewProfile(teacher.id)}
                         >
-                          <span>+{teacher.skills.length - 3}</span>
-                        </button>
-                      )}
-                    </div>
-
-                    {/* View Profile Button - Upwork Green */}
-                    <Button
-                      onClick={() => handleViewProfile(teacher.id)}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white text-xs h-8"
-                    >
-                      See profile
-                    </Button>
-                  </Card>
-                </motion.div>
-              ))}
+                          {t.viewProfile}
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          size="icon"
+                          className="shrink-0 border-slate-200 hover:bg-white hover:text-emerald-600"
+                          onClick={() => handleStartChat(teacher)}
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </Card>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
 
-            {/* Load More Button */}
+            {/* Load More */}
             {sortedTeachers.length > displayCount && (
-              <LoadMoreButton
-                onClick={handleLoadMore}
-                loading={isLoadingMore}
-                hasMore={sortedTeachers.length > displayCount}
-                language={language}
-                totalShown={Math.min(displayCount, sortedTeachers.length)}
-                totalAvailable={sortedTeachers.length}
-              />
-            )}
-
-            {/* Mobile Quick Actions - Below cards */}
-            {sortedTeachers.length > 0 && (
-              <div className="mt-6 lg:hidden">
-                <Card className="p-4 bg-teal-50 border-teal-200">
-                  <p className={`text-sm text-teal-800 mb-3 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>
-                    প্রোফাইল দেখার পর আপনি শিক্ষকের সাথে চ্যাট, ভিডিও মিটিং বা হায়ারিং এগ্রিমেন্ট পাঠাতে পারবেন।
-                  </p>
-                </Card>
+              <div className="mt-10 text-center">
+                <LoadMoreButton 
+                  onClick={handleLoadMore} 
+                  isLoading={isLoadingMore}
+                  language={language}
+                  label={language === 'bn' ? 'আরো দেখুন' : 'Load More'}
+                />
               </div>
-            )}
-
-            {/* Empty State */}
-            {sortedTeachers.length === 0 && (
-              <Card className="p-12 text-center">
-                <div className="text-gray-400 mb-4">
-                  <Search className="w-16 h-16 mx-auto mb-4" />
-                </div>
-                <h3 className={`text-gray-900 mb-2 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>কোনো শিক্ষক পাওয়া যায়নি</h3>
-                <p className={`text-gray-600 mb-4 ${language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}`}>অনুগ্রহ করে আপনার ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন</p>
-                <Button onClick={handleClearFilters} variant="outline" className={language === 'bn' ? 'font-[Noto_Serif_Bengali]' : ''}>
-                  {t.clearFilters}
-                </Button>
-              </Card>
             )}
           </div>
         </div>
       </div>
 
+      <Footer language={language} setPage={setPage} />
+      
       {/* Dialogs */}
-      {selectedTeacher && (
-        <>
-          <ChatDialog
-            open={isChatOpen}
-            onOpenChange={setIsChatOpen}
-            conversation={mockConversations[0]} // Mock conversation
-            language={language}
-            currentUserId={currentUserId}
-            onSendMessage={handleSendMessage}
-            onScheduleVideo={() => {
-              setIsChatOpen(false);
-              setIsVideoMeetingOpen(true);
-            }}
-          />
-
-          <VideoMeetingDialog
-            open={isVideoMeetingOpen}
-            onOpenChange={setIsVideoMeetingOpen}
-            teacherName={selectedTeacher.name}
-            teacherId={selectedTeacher.id}
-            guardianId={currentUserId}
-            language={language}
-            teacherCredits={45} // Mock teacher credits
-            guardianCredits={currentUserCredits}
-            onSchedule={handleVideoScheduled}
-          />
-
-          <HiringAgreementDialog
-            open={isHiringOpen}
-            onOpenChange={setIsHiringOpen}
-            teacherName={selectedTeacher.name}
-            teacherId={selectedTeacher.id}
-            guardianId={currentUserId}
-            subjects={selectedTeacher.subjects}
-            language={language}
-            onSendAgreement={handleAgreementSent}
-          />
-        </>
-      )}
-
-      {/* Auth Dialog */}
+      <ChatDialog 
+        open={isChatOpen} 
+        onOpenChange={setIsChatOpen}
+        teacher={selectedTeacher}
+        currentUser={currentUser}
+        onSendMessage={handleSendMessage}
+      />
+      
+      <VideoMeetingDialog
+        open={isVideoMeetingOpen}
+        onOpenChange={setIsVideoMeetingOpen}
+        teacher={selectedTeacher}
+        onSchedule={handleVideoScheduled}
+        language={language}
+      />
+      
+      <HiringAgreementDialog
+        open={isHiringOpen}
+        onOpenChange={setIsHiringOpen}
+        teacher={selectedTeacher}
+        currentUser={currentUser}
+        onSendAgreement={handleAgreementSent}
+        language={language}
+      />
+      
       <UnifiedAuthDialog
         open={showAuthDialog}
         onOpenChange={setShowAuthDialog}
         language={language}
-        onLogin={onLogin || (() => {})}
-        initialMode="register"
+        onLogin={onLogin}
       />
-
-      <Footer language={language} setPage={setPage} />
     </div>
   );
 }

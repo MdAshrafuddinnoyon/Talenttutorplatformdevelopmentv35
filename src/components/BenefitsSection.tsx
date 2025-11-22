@@ -220,8 +220,9 @@ export function BenefitsSection({ language }: BenefitsSectionProps) {
   const t = content[language];
 
   return (
-    <section className="py-10 sm:py-14 lg:py-20 bg-gradient-to-b from-white via-emerald-50/30 to-white overflow-hidden relative">
-      {/* Enhanced Background decoration */}
+    <section className="py-10 sm:py-14 lg:py-20 relative overflow-hidden">
+      {/* Background decoration - Replaced with glassmorphism over global background */}
+      <div className="absolute inset-0 bg-white/40 backdrop-blur-sm -z-10" />
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-gradient-to-br from-blue-400 via-cyan-400 to-teal-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />

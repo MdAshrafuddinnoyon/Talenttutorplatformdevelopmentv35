@@ -81,6 +81,14 @@ export function HomePage({
 
   return (
     <>
+      {/* Global Background Gradient Mesh */}
+      <div className="fixed inset-0 -z-50 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-emerald-500/10 blur-[100px] animate-pulse-slow" />
+        <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[100px] animate-pulse-slow" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-[40%] left-[30%] w-[300px] h-[300px] rounded-full bg-teal-500/10 blur-[80px] animate-float" />
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay" />
+      </div>
+
       <Header 
         language={language} 
         setLanguage={setLanguage} 
@@ -91,7 +99,7 @@ export function HomePage({
         onLogout={onLogout}
       />
       
-      <main className="min-h-screen bg-gray-50">
+      <main className="min-h-screen relative">
         <HeroSection 
           language={language} 
           setPage={handleSetPage}
@@ -102,14 +110,12 @@ export function HomePage({
         />
 
         {/* AI Matchmaker Section */}
-        <section className="container mx-auto px-4 -mt-10 relative z-20">
-           <div className="max-w-4xl mx-auto">
-             <AIMatchmaker 
-               teachers={teachersDatabase} 
-               onMatchFound={handleMatchFound} 
-               language={language} 
-             />
-           </div>
+        <section className="container mx-auto px-4 -mt-10 relative z-20 mb-12">
+           <AIMatchmaker 
+             teachers={teachersDatabase}
+             onMatchFound={handleMatchFound}
+             language={language}
+           />
         </section>
 
         <LatestTuitionPosts language={language} setPage={handleSetPage} />

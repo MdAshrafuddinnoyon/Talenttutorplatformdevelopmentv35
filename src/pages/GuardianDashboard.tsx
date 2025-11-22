@@ -46,6 +46,7 @@ import { ContractMessagingSystem } from '../components/ContractMessagingSystem';
 import { PlatformReviewDialog } from '../components/PlatformReviewDialog';
 import { EnhancedAITeacherFinderMap } from '../components/EnhancedAITeacherFinderMap';
 import { MapErrorBoundary } from '../components/MapErrorBoundary';
+import { AdminNoticeViewer } from '../components/AdminNoticeViewer';
 
 import { toast } from 'sonner@2.0.3';
 import { type User, type UserRole } from '../utils/authGuard';
@@ -752,6 +753,15 @@ export function GuardianDashboard({ language, onLogout, setPage, currentUser }: 
                   </h1>
                   <p className="text-gray-600">আপনার আজকের সংক্ষিপ্ত তথ্য</p>
                 </div>
+
+                {/* Admin Notices */}
+                <Card className="p-6">
+                  <h3 className="text-xl mb-4 flex items-center gap-2">
+                    <Bell className="w-5 h-5 text-teal-600" />
+                    {language === 'bn' ? 'গুরুত্বপূর্ণ নোটিশ' : 'Important Notices'}
+                  </h3>
+                  <AdminNoticeViewer language={language} userRole="guardian" maxItems={3} />
+                </Card>
 
                 {/* Stats */}
                 <div className="grid md:grid-cols-4 gap-4">
