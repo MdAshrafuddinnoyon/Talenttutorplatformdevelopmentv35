@@ -366,7 +366,8 @@ const myStudents = [
 ];
 
 export function TeacherDashboard({ language, onLogout, setPage, currentUser }: TeacherDashboardProps) {
-  const t = content[language];
+  // Force English for Teacher Dashboard
+  const t = content['en'];
   const [activeTab, setActiveTab] = useState('dashboard');
   
   // Load credits from localStorageCredit system
@@ -384,6 +385,31 @@ export function TeacherDashboard({ language, onLogout, setPage, currentUser }: T
     return 50;
   });
   
+  // Real-time stats state
+  const [stats, setStats] = useState({
+    totalApplications: 0,
+    shortlisted: 0,
+    hired: 0,
+    rating: 4.8,
+    totalEarned: 0,
+    pendingPayments: 0
+  });
+  
+  // Initialize demo data and load stats
+  useState(() => {
+    if (currentUser?.id) {
+      try {
+        const { initializeDemoData, getTeacherStats } = require('../utils/teacherDashboardService');
+        initializeDemoData(currentUser.id);
+        const teacherStats = getTeacherStats(currentUser.id);
+        setStats(teacherStats);
+        console.log('✅ Teacher Dashboard initialized with stats:', teacherStats);
+      } catch (error) {
+        console.error('Error initializing dashboard:', error);
+      }
+    }
+  });
+  
   // Refresh credits when component mounts or user changes
   const refreshCredits = () => {
     if (currentUser?.id) {
@@ -391,17 +417,45 @@ export function TeacherDashboard({ language, onLogout, setPage, currentUser }: T
         const { getCurrentBalance } = require('../utils/localStorageCredit');
         const balance = getCurrentBalance(currentUser.id);
         setCredits(balance);
+        console.log('✅ Credits refreshed:', balance);
       } catch (error) {
         console.error('Error refreshing credits:', error);
       }
     }
   };
   
-  // Listen for credit updates
+  // Refresh stats
+  const refreshStats = () => {
+    if (currentUser?.id) {
+      try {
+        const { getTeacherStats } = require('../utils/teacherDashboardService');
+        const teacherStats = getTeacherStats(currentUser.id);
+        setStats(teacherStats);
+        console.log('✅ Stats refreshed:', teacherStats);
+      } catch (error) {
+        console.error('Error refreshing stats:', error);
+      }
+    }
+  };
+  
+  // Listen for credit updates and application updates
   useState(() => {
-    const handleCreditsUpdate = () => refreshCredits();
+    const handleCreditsUpdate = () => {
+      console.log('🔄 Credits update event received');
+      refreshCredits();
+    };
+    const handleApplicationsUpdate = () => {
+      console.log('🔄 Applications update event received');
+      refreshStats();
+    };
+    
     window.addEventListener('creditsUpdated', handleCreditsUpdate);
-    return () => window.removeEventListener('creditsUpdated', handleCreditsUpdate);
+    window.addEventListener('applicationsUpdated', handleApplicationsUpdate);
+    
+    return () => {
+      window.removeEventListener('creditsUpdated', handleCreditsUpdate);
+      window.removeEventListener('applicationsUpdated', handleApplicationsUpdate);
+    };
   });
   const [isProgressDialogOpen, setIsProgressDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<typeof myStudents[0] | null>(null);
@@ -436,7 +490,7 @@ export function TeacherDashboard({ language, onLogout, setPage, currentUser }: T
   // Profile states
   const [profileImage, setProfileImage] = useState('https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80');
   const [profileData, setProfileData] = useState({
-    name: 'মোঃ করিম উদ্দিন',
+    name: 'Karim Uddin',
     email: 'karim@example.com',
     phone: '০১৭১২৩৪৫৬৭��',
     address: 'মিরপুর, ঢাকা',
@@ -603,35 +657,57 @@ export function TeacherDashboard({ language, onLogout, setPage, currentUser }: T
     setIsApplyDialogOpen(true);
   };
 
-  // Handle Application Submit
-  const handleApplicationSubmit = () => {
+  // Handle Application Submit with Real-time Update
+  const handleApplicationSubmit = (proposal: string, expectedSalary: number) => {
     if (!jobToApply || !currentUser?.id) return;
     
     try {
       const { applyToTuition, CREDIT_COSTS, hasEnoughCredits } = require('../utils/localStorageCredit');
+      const { applyToTuitionRealtime } = require('../utils/teacherDashboardService');
       
-      if (hasEnoughCredits(currentUser.id, CREDIT_COSTS.APPLY_TO_TUITION)) {
-        applyToTuition(currentUser.id, `tuition-${jobToApply.id}`, language);
-        refreshCredits();
-        
-        toast.success(
-          language === 'bn'
-            ? `আবেদন সফলভাবে জমা হয়েছে! ${CREDIT_COSTS.APPLY_TO_TUITION} ক্রেডিট কাটা হয়েছে।`
-            : `Application submitted successfully! ${CREDIT_COSTS.APPLY_TO_TUITION} credits deducted.`
-        );
-        
-        setIsApplyDialogOpen(false);
-        setJobToApply(null);
-      } else {
+      // Check credits
+      if (!hasEnoughCredits(currentUser.id, CREDIT_COSTS.APPLY_TO_TUITION)) {
         toast.error(
           language === 'bn'
             ? `পর্যাপ্ত ক্রেডিট নেই। আবেদন করতে ${CREDIT_COSTS.APPLY_TO_TUITION} ক্রেডিট প্রয়োজন।`
             : `Insufficient credits. You need ${CREDIT_COSTS.APPLY_TO_TUITION} credits to apply.`
         );
         setPage('subscription');
+        return;
+      }
+      
+      // Apply to tuition with real-time tracking
+      const result = applyToTuitionRealtime(
+        currentUser.id, 
+        `tuition-${jobToApply.id}`,
+        proposal,
+        expectedSalary,
+        language
+      );
+      
+      if (result.success) {
+        // Deduct credits
+        applyToTuition(currentUser.id, `tuition-${jobToApply.id}`, language);
+        
+        // Refresh UI
+        refreshCredits();
+        refreshStats();
+        
+        toast.success(
+          language === 'bn'
+            ? `✅ আবেদন সফলভাবে জমা হয়েছে! ${CREDIT_COSTS.APPLY_TO_TUITION} ক্রেডিট কাটা হয়েছে।`
+            : `✅ Application submitted successfully! ${CREDIT_COSTS.APPLY_TO_TUITION} credits deducted.`
+        );
+        
+        console.log('✅ Application submitted successfully');
+        
+        setIsApplyDialogOpen(false);
+        setJobToApply(null);
+      } else {
+        toast.error(result.message);
       }
     } catch (error) {
-      console.error('Error submitting application:', error);
+      console.error('❌ Error submitting application:', error);
       toast.error(
         language === 'bn'
           ? 'আবেদন জমা দিতে সমস্যা হয়েছে।'
@@ -647,7 +723,7 @@ export function TeacherDashboard({ language, onLogout, setPage, currentUser }: T
         <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
             <TalentTutorLogo size="md" showText={true} showSubtitle={false} />
-            <p className="text-xs text-gray-500 hidden sm:block ml-2 font-[Noto_Serif_Bengali]">শিক্ষক ড্যাশবোর্ড</p>
+            <p className="text-xs text-gray-500 hidden sm:block ml-2">Teacher Dashboard</p>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">
@@ -655,10 +731,10 @@ export function TeacherDashboard({ language, onLogout, setPage, currentUser }: T
               variant="outline" 
               size="sm"
               onClick={() => setIsTicketDialogOpen(true)}
-              className="hidden sm:flex font-[Noto_Serif_Bengali]"
+              className="hidden sm:flex"
             >
               <MessageSquare className="w-4 h-4 mr-2" />
-              সাপোর্ট
+              সাপ��র্ট
             </Button>
             
             <NotificationCenter 
@@ -669,7 +745,7 @@ export function TeacherDashboard({ language, onLogout, setPage, currentUser }: T
             <div className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl shadow-sm">
               <Wallet className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
               <span className="font-semibold text-emerald-700">{credits}</span>
-              <span className="text-sm text-emerald-600 hidden sm:inline font-[Noto_Serif_Bengali]">ক্রেডিট</span>
+              <span className="text-sm text-emerald-600 hidden sm:inline">Credits</span>
             </div>
             <Button 
               variant="ghost" 
@@ -824,7 +900,7 @@ export function TeacherDashboard({ language, onLogout, setPage, currentUser }: T
                   onClick={() => setActiveTab('support')}
                 >
                   <MessageSquare className="w-4 h-4 mr-2" />
-                  {t.support}
+                  Support & Help
                 </Button>
               </div>
             </Card>
@@ -836,13 +912,14 @@ export function TeacherDashboard({ language, onLogout, setPage, currentUser }: T
               <div className="space-y-6">
                 <div>
                   <h1 className="text-gray-900 mb-2">
-                    {t.welcome}, মোঃ করিম উদ্দিন!
+                    {t.welcome}, Karim Uddin!
                   </h1>
-                  <p className="text-gray-600">আপনার আজকের সংক্ষিপ্ত তথ্য</p>
+                  <p className="text-gray-600">Your today's summary</p>
                 </div>
 
                 {/* Modern Stats Cards */}
                 <div className="grid md:grid-cols-4 gap-4">
+                  {/* Credits Card - Real-time */}
                   <Card className="p-6 bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 hover:shadow-lg transition-all">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-gray-600">ক্রেডিট</span>
@@ -851,43 +928,41 @@ export function TeacherDashboard({ language, onLogout, setPage, currentUser }: T
                     <div className="text-3xl font-bold text-emerald-700">{credits}</div>
                     <p className="text-sm text-emerald-600 mt-1">বর্তমান ব্যালেন্স</p>
                   </Card>
+                  
+                  {/* Total Applications - Real-time */}
                   <Card className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 hover:shadow-lg transition-all">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-gray-600">আবেদন</span>
                       <Briefcase className="w-5 h-5 text-blue-600" />
                     </div>
                     <div className="text-3xl font-bold text-blue-700">
-                      {(() => {
-                        const applications = JSON.parse(localStorage.getItem('jobApplications') || '[]');
-                        return applications.filter((app: any) => app.teacherId === currentUser?.id).length;
-                      })()}
+                      {stats.totalApplications}
                     </div>
                     <p className="text-sm text-blue-600 mt-1">মোট আবেদন</p>
                   </Card>
+                  
+                  {/* Shortlisted - Real-time */}
                   <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 hover:shadow-lg transition-all">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-gray-600">শর্টলিস্ট</span>
                       <CheckCircle className="w-5 h-5 text-green-600" />
                     </div>
                     <div className="text-3xl font-bold text-green-700">
-                      {(() => {
-                        const applications = JSON.parse(localStorage.getItem('jobApplications') || '[]');
-                        return applications.filter((app: any) => 
-                          app.teacherId === currentUser?.id && app.status === 'accepted'
-                        ).length;
-                      })()}
+                      {stats.shortlisted}
                     </div>
                     <p className="text-sm text-green-600 mt-1">নির্বাচিত</p>
                   </Card>
+                  
+                  {/* Rating - Real-time */}
                   <Card className="p-6 bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-200 hover:shadow-lg transition-all">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-gray-600">রেটিং</span>
                       <Star className="w-5 h-5 text-yellow-600" />
                     </div>
                     <div className="text-3xl font-bold text-yellow-700 flex items-center gap-1">
-                      ৪.৮ <Star className="w-5 h-5 fill-yellow-500 text-yellow-500" />
+                      {stats.rating.toFixed(1)} <Star className="w-5 h-5 fill-yellow-500 text-yellow-500" />
                     </div>
-                    <p className="text-sm text-yellow-600 mt-1">২৪টি রিভিউ</p>
+                    <p className="text-sm text-yellow-600 mt-1">গড় রেটিং</p>
                   </Card>
                 </div>
 
@@ -1138,8 +1213,8 @@ Talent Tutor Platform
                 {/* Payment History Table */}
                 <Card className="overflow-hidden">
                   <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b">
-                    <h3 className="text-gray-900">পেমেন্ট ইতিহাস</h3>
-                    <p className="text-sm text-gray-600">আপনার সকল পেমেন্ট এবং বকেয়া তথ্য</p>
+                    <h3 className="text-gray-900">Payment History</h3>
+                    <p className="text-sm text-gray-600">All your payment and pending information</p>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full">
@@ -1341,8 +1416,8 @@ Talent Tutor Platform
                         localStorage.setItem('progressReports', JSON.stringify(reports));
                         
                         setIsProgressDialogOpen(false);
-                        toast.success('প্রগ্রেস রিপোর্ট সফলভাবে আপডেট করা হয়েছে!', {
-                          description: `${selectedStudent.name} এর রিপোর্ট সংরক্ষিত হয়েছে`
+                        toast.success('Progress report updated successfully!', {
+                          description: `Report for ${selectedStudent.name} has been saved`
                         });
                       }}>
                         <div>
@@ -1477,10 +1552,10 @@ Talent Tutor Platform
                     <DialogHeader>
                       <DialogTitle className="flex items-center gap-2">
                         <FileText className="w-5 h-5 text-emerald-600" />
-                        প্রগ্রেস রিপোর্ট - {selectedStudentForReports?.name}
+                        Progress Report - {selectedStudentForReports?.name}
                       </DialogTitle>
                       <DialogDescription>
-                        সকল প্রগ্রেস রিপোর্ট এবং পারফরম্যান্স হিস্টরি
+                        All progress reports and performance history
                       </DialogDescription>
                     </DialogHeader>
                     
@@ -1549,8 +1624,8 @@ Talent Tutor Platform
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-gray-900">আমার আবেদনসমূহ</h2>
-                    <p className="text-gray-600">আপনার সকল টিউশন আবেদনের তথ্য</p>
+                    <h2 className="text-gray-900">My Applications</h2>
+                    <p className="text-gray-600">All your tuition application information</p>
                   </div>
                 </div>
 
@@ -1679,11 +1754,11 @@ Talent Tutor Platform
                                   className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
                                   onClick={() => {
                                     setActiveTab('contracts');
-                                    toast.success('চুক্তি পাতায় যাচ্ছেন...');
+                                    toast.success('Going to contracts page...');
                                   }}
                                 >
                                   <FileText className="w-4 h-4 mr-1" />
-                                  চুক্তি দেখুন
+                                  View Contract
                                 </Button>
                               )}
                               {application.status === 'pending' && (
