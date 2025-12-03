@@ -9,9 +9,11 @@
 
 **একটি আধুনিক, Upwork-style টিউশন মার্কেটপ্লেস প্ল্যাটফর্ম যা মানবিক উদ্যোগ (যাকাত/দান ব্যবস্থা) অন্তর্ভুক্ত করে।**
 
-[Features](#-key-features) • [Installation](#-installation) • [Quick Start](#-quick-start) • [Documentation](#-documentation) • [Testing](#-testing)
+[Features](#-key-features) • [Quick Start](#-quick-start) • [Deployment](#-deployment) • [Documentation](#-documentation)
 
-> 📚 **Complete Documentation**: See [`/docs/README.md`](./docs/README.md) for comprehensive guides and resources.
+> ⚠️ **Important**: এটি একটি Modern React Application। সরাসরি HTML হিসেবে চলবে না! [দ্রুত শুরু করুন](#-quick-start)
+
+> 📚 **বাংলা গাইড**: [`শুরু_করুন_এখানে.md`](./শুরু_করুন_এখানে.md) | **Deployment Guide**: [`লোকাল_এবং_লাইভ_সার্ভার_ডিপ্লয়_সম্পূর্ণ_গাইড.md`](./লোকাল_এবং_লাইভ_সার্ভার_ডিপ্লয়_সম্পূর্ণ_গাইড.md)
 
 </div>
 
@@ -22,6 +24,7 @@
 - [Overview](#-overview)
 - [Key Features](#-key-features)
 - [Quick Start](#-quick-start)
+- [Deployment](#-deployment)
 - [Technology Stack](#-technology-stack)
 - [Installation](#-installation)
 - [User Roles](#-user-roles)
@@ -236,7 +239,7 @@ talent-tutor/
 - ভিডিও মিটিং schedule করা (20 credits)
 - Hiring agreement পাঠানো
 - Contract management
-- ক্রেডিট ক্রয় করা
+- ক্রে���িট ক্রয় করা
 
 ### 3. ছাত্র/অসহায় (Student)
 **Initial Credits:** N/A (সাহায্য ভিত্তিক)
