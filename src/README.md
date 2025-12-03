@@ -11,9 +11,9 @@
 
 [Features](#-key-features) • [Quick Start](#-quick-start) • [Deployment](#-deployment) • [Documentation](#-documentation)
 
-> ⚠️ **Important**: এটি একটি Modern React Application। সরাসরি HTML হিসেবে চলবে না! [দ্রুত শুরু করুন](#-quick-start)
+> ⚠️ **Important**: This is a Modern React Application. Won't work as simple HTML! See [Quick Start](#-quick-start)
 
-> 📚 **বাংলা গাইড**: [`শুরু_করুন_এখানে.md`](./শুরু_করুন_এখানে.md) | **Deployment Guide**: [`লোকাল_এবং_লাইভ_সার্ভার_ডিপ্লয়_সম্পূর্ণ_গাইড.md`](./লোকাল_এবং_লাইভ_সার্ভার_ডিপ্লয়_সম্পূর্ণ_গাইড.md)
+> 📚 **Setup Guides**: [`QUICK_START_GUIDE.md`](./QUICK_START_GUIDE.md) • [`DEPLOYMENT_GUIDE_COMPLETE.md`](./DEPLOYMENT_GUIDE_COMPLETE.md) • [`TROUBLESHOOTING_GUIDE.md`](./TROUBLESHOOTING_GUIDE.md) • [`DEPLOYMENT_CHECKLIST.md`](./DEPLOYMENT_CHECKLIST.md)
 
 </div>
 
@@ -222,7 +222,7 @@ talent-tutor/
 
 **Capabilities:**
 - টিউশন জব ব্রাউজ করা
-- জবে আবেদন করা (10 credits)
+- জবে আ��েদন করা (10 credits)
 - অভিভাবকদের সাথে চ্যাট (1 credit/message)
 - ভিডিও মিটিং করা (20 credits)
 - প্রোফাইল ম্যানেজমেন্ট
@@ -239,7 +239,7 @@ talent-tutor/
 - ভিডিও মিটিং schedule করা (20 credits)
 - Hiring agreement পাঠানো
 - Contract management
-- ক্রে���িট ক্রয় করা
+- ক্রেডিট ক্রয় করা
 
 ### 3. ছাত্র/অসহায় (Student)
 **Initial Credits:** N/A (সাহায্য ভিত্তিক)
